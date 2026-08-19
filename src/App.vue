@@ -149,41 +149,44 @@ function finish() {
               <span class="seg-main">{{ n }}</span>
             </button>
           </div>
+
+          <div class="duo">
+            <div class="col">
+              <span class="tag">Show (From)</span>
+              <div class="seg">
+                <button
+                  v-for="f in FORMATS"
+                  :key="f.id"
+                  type="button"
+                  class="seg-btn"
+                  :class="{ on: q.from.value === f.id }"
+                  :aria-pressed="q.from.value === f.id"
+                  @click="q.from.value = f.id"
+                >
+                  <span class="seg-main">{{ f.label }}</span>
+                </button>
+              </div>
+            </div>
+            <div class="col">
+              <span class="tag">Answer (To)</span>
+              <div class="seg">
+                <button
+                  v-for="f in FORMATS"
+                  :key="f.id"
+                  type="button"
+                  class="seg-btn"
+                  :class="{ on: q.to.value === f.id }"
+                  :aria-pressed="q.to.value === f.id"
+                  @click="q.to.value = f.id"
+                >
+                  <span class="seg-main">{{ f.label }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
         <CategoryList :blocks="q.levelBlocks.value" v-model:selected="q.selected.value" />
-
-        <div class="card">
-          <span class="tag">Show (From)</span>
-          <div class="seg">
-            <button
-              v-for="f in FORMATS"
-              :key="f.id"
-              type="button"
-              class="seg-btn"
-              :class="{ on: q.from.value === f.id }"
-              :aria-pressed="q.from.value === f.id"
-              @click="q.from.value = f.id"
-            >
-              <span class="seg-main">{{ f.label }}</span>
-            </button>
-          </div>
-
-          <span class="tag">Answer (To)</span>
-          <div class="seg">
-            <button
-              v-for="f in FORMATS"
-              :key="f.id"
-              type="button"
-              class="seg-btn"
-              :class="{ on: q.to.value === f.id }"
-              :aria-pressed="q.to.value === f.id"
-              @click="q.to.value = f.id"
-            >
-              <span class="seg-main">{{ f.label }}</span>
-            </button>
-          </div>
-        </div>
 
         <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
           Start · {{ q.roundSize.value }} kanji
@@ -378,6 +381,17 @@ function finish() {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+.duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
 }
 .tag {
   font-size: 0.8rem;
