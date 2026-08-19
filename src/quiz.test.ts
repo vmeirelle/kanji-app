@@ -40,14 +40,20 @@ describe('buildQuestion', () => {
   })
 })
 
-describe('seed data yields 9 options for every kanji and answer format', () => {
+describe('seed data yields full, non-repeating options for every kanji and answer format', () => {
   for (const block of blocks as Block[]) {
     for (const fmt of FORMATS) {
       it(`${block.name} / To=${fmt.label}`, () => {
         const mode = modeOf('char', fmt.id)
         for (const target of block.kanji) {
           const q = buildQuestion(target, block.kanji, mode, 9)
-          expect(q.options).toHaveLength(9) // no duplicate labels collapsing a square
+          // Every square is distinct — no duplicate labels collapsing a square.
+          const labels = q.options.map((o) => o.label)
+          expect(new Set(labels).size).toBe(labels.length)
+          // The grid fills to 9, or to however many distinct answers the block
+          // can offer when a themed category is smaller than the grid.
+          const distinct = new Set(block.kanji.map((k) => k[fmt.id])).size
+          expect(q.options).toHaveLength(Math.min(9, distinct))
         }
       })
     }
