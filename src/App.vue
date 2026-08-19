@@ -121,7 +121,7 @@ function finish() {
 
     <template v-if="view === 'learn'">
 
-      <section v-if="q.phase.value === 'ready'" class="pick">
+      <section v-if="q.phase.value === 'ready'" class="pick" :style="{ '--lv': levelColor(q.level.value) }">
         <div class="card">
           <span class="tag">Game</span>
           <div class="seg">
@@ -634,8 +634,8 @@ function finish() {
   cursor: default;
 }
 .btn.primary {
-  border-color: var(--brand);
-  background: var(--brand);
+  border-color: var(--lv, var(--brand));
+  background: var(--lv, var(--brand));
   color: #fff;
 }
 </style>
