@@ -79,6 +79,7 @@ function finish() {
       :items="NAV"
       :active="view"
       @select="go"
+      @home="goHome"
       @close="menuOpen = false"
     />
 

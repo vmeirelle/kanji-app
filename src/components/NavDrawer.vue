@@ -2,7 +2,7 @@
 export type NavItem = { id: string; label: string; icon?: string }
 
 defineProps<{ open: boolean; items: NavItem[]; active: string }>()
-const emit = defineEmits<{ select: [id: string]; close: [] }>()
+const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
 </script>
 
 <template>
@@ -11,8 +11,10 @@ const emit = defineEmits<{ select: [id: string]; close: [] }>()
       <div class="backdrop" @click="emit('close')" />
       <aside class="panel">
         <div class="top">
-          <button class="ham" aria-label="Close menu" @click="emit('close')">☰</button>
-          <div class="brand"><img class="brand-logo" src="/logo.png" alt="Kanji Quiz" /></div>
+          <button class="ham" aria-label="Home" @click="emit('home')">☰</button>
+          <button class="brand" aria-label="Home" @click="emit('home')">
+            <img class="brand-logo" src="/logo.png" alt="Kanji Quiz" />
+          </button>
         </div>
         <nav class="nav">
           <button
@@ -72,6 +74,9 @@ const emit = defineEmits<{ select: [id: string]; close: [] }>()
 }
 .brand {
   padding: 0 0.5rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
 .brand-logo {
   height: 3rem;
