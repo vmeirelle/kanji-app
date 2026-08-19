@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useQuiz } from './useQuiz'
+import { useQuiz } from './composables/useQuiz'
+import { useBreakpoint } from './composables/useBreakpoint'
 import { loadRankings, addRanking, today, pointsOf, type Ranking } from './rankings'
 import { levelColor } from './data/blocks'
 import { FORMATS } from './quiz'
@@ -18,6 +19,7 @@ const NAV: NavItem[] = [
 ]
 
 const q = useQuiz()
+const { isDesktop } = useBreakpoint()
 const view = ref('learn')
 const menuOpen = ref(false)
 const rankings = ref<Ranking[]>([])
@@ -102,6 +104,7 @@ function finish() {
       </header>
 
     <NavDrawer
+      v-if="!isDesktop"
       :open="menuOpen"
       :items="NAV"
       :active="view"

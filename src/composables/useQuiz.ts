@@ -1,8 +1,8 @@
 import { ref, computed, watch } from 'vue'
-import { blocksIn, levelsOf, loadBlocks, poolOf, type Block } from './data/blocks'
-import { modeOf, buildQuestion, shuffle, type Format, type Question } from './quiz'
-import * as storage from './storage'
-import { dropSaved, loadSaved, putSaved, type Round, type SavedLesson } from './saved'
+import { blocksIn, levelsOf, loadBlocks, poolOf, type Block } from '../data/blocks'
+import { modeOf, buildQuestion, shuffle, type Format, type Question } from '../quiz'
+import * as storage from '../storage'
+import { dropSaved, loadSaved, putSaved, type Round, type SavedLesson } from '../saved'
 
 type Phase = 'ready' | 'question' | 'done'
 

@@ -107,8 +107,6 @@ const onEnd = (e: TouchEvent) => {
         </li>
       </ol>
     </div>
-
-    <p class="hint">Swipe left/right to change day</p>
   </section>
 </template>
 

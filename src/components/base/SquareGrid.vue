@@ -1,14 +1,31 @@
 <script setup lang="ts">
+import type { CSSProperties } from 'vue'
+import { useTheme, Color } from '../../composables/useTheme'
+
+type State = 'correct' | 'wrong'
+
 export type GridItem = {
   key: string
   label: string
-  state?: 'correct' | 'wrong'
+  state?: State
   // When set (the wrong square you tapped), the square shows all three facets.
   detail?: { char: string; kana: string; meaning: string }
 }
 
 defineProps<{ items: GridItem[]; disabled?: boolean }>()
 const emit = defineEmits<{ select: [key: string] }>()
+
+const theme = useTheme()
+// [border, background, text] tokens per revealed state.
+const stateColors: Record<State, [Color, Color, Color]> = {
+  correct: [Color.Correct, Color.CorrectSoft, Color.Correct],
+  wrong: [Color.Wrong, Color.Wrong, Color.OnBrand],
+}
+function stateStyle(item: GridItem): CSSProperties {
+  if (!item.state) return {} // default look comes from the theme vars in CSS
+  const [border, bg, text] = stateColors[item.state]
+  return { borderColor: theme.color(border), background: theme.color(bg), color: theme.color(text) }
+}
 </script>
 
 <template>
@@ -17,7 +34,7 @@ const emit = defineEmits<{ select: [key: string] }>()
       v-for="item in items"
       :key="item.key"
       class="square"
-      :class="item.state"
+      :style="stateStyle(item)"
       :disabled="disabled"
       @click="emit('select', item.key)"
     >
@@ -36,7 +53,7 @@ const emit = defineEmits<{ select: [key: string] }>()
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr)); /* always 3×3, any width */
   gap: 0.75rem;
-  max-width: 30rem; /* keep squares tappable, not huge, on wide screens */
+  max-width: 34rem; /* keep squares tappable, not huge, on wide screens */
   margin: 0 auto;
 }
 .square {
@@ -60,16 +77,6 @@ const emit = defineEmits<{ select: [key: string] }>()
 }
 .square:disabled {
   cursor: default;
-}
-.square.correct {
-  border-color: #16a34a;
-  background: #16a34a22;
-  color: #16a34a;
-}
-.square.wrong {
-  border-color: #dc2626;
-  background: #dc2626;
-  color: #fff;
 }
 .detail {
   display: flex;
