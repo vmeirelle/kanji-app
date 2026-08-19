@@ -239,20 +239,23 @@ function finish() {
           </button>
 
           <template v-if="q.mode.value === 'ranked'">
-            <template v-if="!saved">
-              <input
-                v-model="name"
-                class="input"
-                type="text"
-                placeholder="Your name"
-                maxlength="20"
-                @keyup.enter="saveScore"
-              />
-              <button class="btn primary" :disabled="!name.trim()" @click="saveScore">
-                Save to ranking
-              </button>
-            </template>
-            <p v-else class="saved">Saved ✓</p>
+            <input
+              v-model="name"
+              class="input"
+              type="text"
+              placeholder="Your name"
+              maxlength="20"
+              :disabled="saved"
+              @keyup.enter="saveScore"
+            />
+            <button
+              class="btn primary"
+              :class="{ done: saved }"
+              :disabled="saved || !name.trim()"
+              @click="saveScore"
+            >
+              {{ saved ? 'Saved ' : 'Save to ranking' }}
+            </button>
           </template>
 
           <button class="btn" @click="finish">Finish</button>
@@ -523,9 +526,11 @@ function finish() {
   color: var(--color-text);
   margin-bottom: 0.25rem;
 }
-.saved {
-  color: var(--brand);
-  font-weight: 600;
+.btn.primary.done {
+  opacity: 1;
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #fff;
 }
 .input {
   padding: 0.75rem;
