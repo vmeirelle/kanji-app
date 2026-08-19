@@ -6,9 +6,9 @@ const props = withDefaults(
   defineProps<{
     direction?: Direction
     gap?: Space
-    align?: Align // alignItems
-    justify?: Align // justifyContent
-    grow?: boolean // take remaining space and allow shrinking (min-width: 0)
+    align?: Align
+    justify?: Align
+    grow?: boolean
   }>(),
   { direction: Direction.Col },
 )

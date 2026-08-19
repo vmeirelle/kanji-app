@@ -11,7 +11,6 @@ const props = defineProps<{
 }>()
 const emit = defineEmits<{ answer: [key: string] }>()
 
-// The back of the card carries the verdict: green when right, red when wrong.
 const verdict = computed(() => {
   if (!props.chosenKey) return null
   return props.question.options.find((o) => o.key === props.chosenKey)?.correct ? 'ok' : 'no'
@@ -21,7 +20,7 @@ const items = computed<GridItem[]>(() =>
   props.question.options.map((o) => {
     if (!props.chosenKey) return { key: o.key, label: o.label }
     if (o.correct) return { key: o.key, label: o.label, state: 'correct' }
-    // The wrong square the user tapped expands to its three facets.
+
     if (o.key === props.chosenKey)
       return { key: o.key, label: o.label, state: 'wrong', detail: o.facets }
     return { key: o.key, label: o.label }
@@ -31,8 +30,7 @@ const items = computed<GridItem[]>(() =>
 
 <template>
   <div class="quiz">
-    <!-- Prompt card: the question on the front, the full kanji on the back.
-         It flips on answering; both faces keep the same box, so nothing reflows. -->
+    
     <div class="stage">
       <div class="card" :class="{ flipped: chosenKey }">
         <div class="face front">
@@ -77,8 +75,7 @@ const items = computed<GridItem[]>(() =>
   border-radius: 1rem;
   background: var(--color-background-soft);
   backface-visibility: hidden;
-  /* Each face turns on its own, and opacity hands over at the halfway point —
-     so the flip holds up even where the browser flattens the 3D context. */
+  
   transition:
     transform 0.28s ease-out,
     opacity 0s linear 0.14s;

@@ -3,7 +3,7 @@ import { computed, type CSSProperties } from 'vue'
 import { useTheme, Color } from '../../composables/useTheme'
 
 const props = withDefaults(
-  defineProps<{ value: number; height?: number }>(), // value 0–100, height in rem
+  defineProps<{ value: number; height?: number }>(),
   { height: 0.5 },
 )
 const theme = useTheme()

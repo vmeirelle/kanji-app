@@ -1,10 +1,4 @@
-/**
- * Typed design tokens — the single source of truth for colour, size, spacing,
- * alignment and variants. Components take these enums as props (never raw
- * strings) and resolve them here, so nothing is styled with magic values.
- * Theme-aware colours point at the light/dark CSS variables in assets/base.css;
- * everything else is a literal owned here.
- */
+
 import type { CSSProperties } from 'vue'
 
 export enum Size {

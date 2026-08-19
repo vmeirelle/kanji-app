@@ -6,21 +6,18 @@ const props = defineProps<{ rankings: Ranking[] }>()
 
 type BlockGroup = { blockId: string; blockName: string; entries: Ranking[] }
 
-const day = ref(today()) // the day currently shown; ‹ › or swipe to change
-const category = ref('') // '' = all categories
-const quantity = ref('') // '' = any kanji count
-const dayOf = (r: Ranking) => r.day ?? r.date.slice(0, 10) // fallback for old entries
+const day = ref(today())
+const category = ref('')
+const quantity = ref('')
+const dayOf = (r: Ranking) => r.day ?? r.date.slice(0, 10)
 
-// Category options: every distinct selection that has a score.
 const categories = computed(() =>
   [...new Set(props.rankings.map((r) => r.blockName))].sort((a, b) => a.localeCompare(b)),
 )
-// Quantity options: every distinct kanji count that has a score.
 const quantities = computed(() =>
   [...new Set(props.rankings.map((r) => r.total))].sort((a, b) => a - b),
 )
 
-// Blocks (with ranked scores) for the selected day, narrowed by both filters.
 const blocks = computed<BlockGroup[]>(() => {
   const map = new Map<string, BlockGroup>()
   for (const r of props.rankings) {
@@ -38,7 +35,6 @@ const blocks = computed<BlockGroup[]>(() => {
   return [...map.values()].sort((a, b) => a.blockName.localeCompare(b.blockName))
 })
 
-// Kanji quantity of the run(s) in a group (a range if players used different sizes).
 const qtyLabel = (g: BlockGroup) => {
   const totals = [...new Set(g.entries.map((e) => e.total))].sort((a, b) => a - b)
   const lo = totals[0]
@@ -46,7 +42,6 @@ const qtyLabel = (g: BlockGroup) => {
   return lo === hi ? `${lo} kanji` : `${lo}–${hi} kanji`
 }
 
-// Can't go to a future day; older days are always reachable.
 const canNewer = computed(() => day.value < today())
 const older = () => (day.value = addDays(day.value, -1))
 const newer = () => canNewer.value && (day.value = addDays(day.value, 1))
@@ -57,7 +52,6 @@ const dayLabel = computed(() => {
   return day.value
 })
 
-// Horizontal swipe: right → older day (‹), left → newer day (›).
 let startX = 0
 const onStart = (e: TouchEvent) => (startX = e.changedTouches[0]!.clientX)
 const onEnd = (e: TouchEvent) => {

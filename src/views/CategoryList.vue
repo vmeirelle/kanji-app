@@ -5,7 +5,6 @@ import { blocksIn, levelColor, levelsOf, type Block } from '../data/blocks'
 const props = defineProps<{ blocks: Block[]; selected: string[] }>()
 const emit = defineEmits<{ 'update:selected': [string[]] }>()
 
-/** One group per level on offer, in data order (easiest first). */
 const groups = computed(() =>
   levelsOf(props.blocks).map((level) => ({ level, blocks: blocksIn(props.blocks, [level]) })),
 )
@@ -19,7 +18,6 @@ function toggle(id: string) {
   )
 }
 
-/** Take or drop a whole level's categories at once. */
 function toggleGroup(blocks: Block[]) {
   const ids = blocks.map((b) => b.id)
   emit(
@@ -123,7 +121,7 @@ function toggleGroup(blocks: Block[]) {
   font-size: 0.75rem;
   line-height: 1.15;
   text-align: center;
-  /* Long category names truncate rather than blow the square open. */
+  
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;

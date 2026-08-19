@@ -1,4 +1,4 @@
-/* color palette from <https://github.com/vuejs/theme> */
+
 :root {
   --vt-c-white: #ffffff;
   --vt-c-white-soft: #f8f8f8;
@@ -21,7 +21,6 @@
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
 }
 
-/* semantic color variables for this project */
 :root {
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
@@ -33,11 +32,11 @@
   --color-heading: var(--vt-c-text-light-1);
   --color-text: var(--vt-c-text-light-1);
 
-  /* Brand palette derived from the app logo (navy card + blue brush accent). */
+  
   --brand: #345b9c;
   --brand-navy: #1e2c4d;
 
-  /* Difficulty accents: blue is easiest, red is hardest. */
+  
   --lv-N5: #2563eb;
   --lv-N4: #0d9488;
   --lv-N3: #ca8a04;
@@ -64,7 +63,7 @@
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
 
-    /* Lighter brush-blue for contrast on dark backgrounds. */
+    
     --brand: #6d97d6;
   }
 }

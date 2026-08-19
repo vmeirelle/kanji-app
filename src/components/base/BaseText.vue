@@ -8,8 +8,8 @@ const props = withDefaults(
     color?: Color
     bold?: boolean
     align?: Align
-    caps?: boolean // uppercase label style (the section tags)
-    truncate?: boolean // single line with ellipsis
+    caps?: boolean
+    truncate?: boolean
   }>(),
   { size: Size.Md, color: Color.Text, align: Align.Start },
 )

@@ -11,7 +11,6 @@ import RankingView from './views/RankingView.vue'
 import SavedView from './views/SavedView.vue'
 import NavDrawer, { type NavItem } from './components/base/NavDrawer.vue'
 
-// The menu is data-driven — add a NavItem (and a matching branch) for new tabs.
 const NAV: NavItem[] = [
   { id: 'learn', label: 'Learn', icon: '📖' },
   { id: 'saved', label: 'Unfinished', icon: '⏸️' },
@@ -31,7 +30,6 @@ onMounted(() => {
   rankings.value = loadRankings()
 })
 
-// Fill fraction for the progress bar (current question / pass size).
 const progress = computed(() =>
   q.passTotal.value ? (q.position.value / q.passTotal.value) * 100 : 0,
 )
@@ -41,14 +39,12 @@ function go(id: string) {
   menuOpen.value = false
 }
 
-// The logo is Home: back to Learn, abandoning any run in progress.
 function goHome() {
   view.value = 'learn'
   menuOpen.value = false
   if (q.phase.value !== 'ready') q.restart()
 }
 
-// Picking up a paused lesson drops you straight back into the questions.
 function resumeLesson(id: string) {
   q.resume(id)
   view.value = 'learn'
@@ -77,7 +73,7 @@ function finish() {
 
 <template>
   <div class="shell">
-    <!-- Desktop navigation. Narrow screens hide this and use the drawer instead. -->
+    
     <aside class="side">
       <button class="side-brand" aria-label="Home" @click="goHome">
         <img class="logo" src="/logo.png" alt="Kanji Quiz" />
@@ -113,9 +109,9 @@ function finish() {
       @close="menuOpen = false"
     />
 
-    <!-- LEARN -->
+    
     <template v-if="view === 'learn'">
-      <!-- Levels mix freely; categories follow whatever is checked. Both remembered. -->
+      
       <section v-if="q.phase.value === 'ready'" class="pick">
         <div class="card">
           <span class="tag">Japanese level</span>
@@ -194,7 +190,7 @@ function finish() {
         </button>
       </section>
 
-      <!-- Answer questions -->
+      
       <section v-else-if="q.phase.value === 'question' && q.question.value">
         <div class="bar">
           <button class="stop" @click="finish">✕ Stop</button>
@@ -212,13 +208,13 @@ function finish() {
           :disabled="q.answered.value"
           @answer="q.answer"
         />
-        <!-- After answering, a tap anywhere goes to the next kanji. -->
+        
         <div v-if="q.answered.value" class="tap-next" @click="q.next">
           <span class="tap-hint">Tap anywhere for next</span>
         </div>
       </section>
 
-      <!-- End-of-pass popup -->
+      
       <div v-else class="overlay">
         <div class="modal">
           <p class="lead">Round complete 🎉</p>
@@ -252,7 +248,7 @@ function finish() {
       </div>
     </template>
 
-    <!-- UNFINISHED -->
+    
     <SavedView
       v-else-if="view === 'saved'"
       :lessons="q.savedLessons.value"
@@ -260,7 +256,7 @@ function finish() {
       @drop="q.drop"
     />
 
-    <!-- RANKING -->
+    
     <RankingView v-else :rankings="rankings" />
     </main>
   </div>
@@ -277,7 +273,7 @@ function finish() {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  min-height: 100vh; /* so the pick screen can pin its Start button to the bottom */
+  min-height: 100vh; 
 }
 .top {
   display: flex;
@@ -294,7 +290,7 @@ function finish() {
   padding: 0.25rem 0.5rem;
 }
 .brand {
-  margin-left: auto; /* push the logo to the right edge */
+  margin-left: auto; 
   display: flex;
   border: none;
   background: transparent;
@@ -306,7 +302,7 @@ function finish() {
   border-radius: 0.5rem;
 }
 .side {
-  display: none; /* mobile: the drawer covers navigation */
+  display: none; 
 }
 .side-brand {
   border: none;
@@ -342,9 +338,8 @@ function finish() {
   font-weight: 600;
 }
 
-/* Desktop: a standing sidebar replaces the header and the drawer. */
 @media (min-width: 48rem) {
-  /* Sidebar hugs the left edge; the content centres in whatever is left. */
+  
   .shell {
     display: grid;
     grid-template-columns: 13rem minmax(0, 1fr);
@@ -361,7 +356,7 @@ function finish() {
     min-height: 100vh;
   }
   .top {
-    display: none; /* logo and nav live in the sidebar */
+    display: none; 
   }
   .app {
     max-width: 34rem;
@@ -373,10 +368,9 @@ function finish() {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  flex: 1; /* fill the app column so Start can sit at the bottom */
+  flex: 1; 
 }
-/* Start stays anchored to the bottom, so it doesn't jump when the category
-   count changes between levels. */
+
 .pick > .btn.primary {
   margin-top: auto;
 }
@@ -402,7 +396,7 @@ function finish() {
   color: var(--color-text);
   font-variant-numeric: tabular-nums;
 }
-/* Segmented control: one strip, one cell per option. */
+
 .seg {
   display: grid;
   grid-auto-flow: column;
@@ -438,7 +432,7 @@ function finish() {
   color: #fff;
   font-weight: 600;
 }
-/* Locked: the pool at this level can't fill this size. */
+
 .seg-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;

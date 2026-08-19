@@ -1,8 +1,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 
-const DESKTOP_PX = 768 // matches the 48rem layout breakpoint
+const DESKTOP_PX = 768
 
-/** Reactive viewport size, narrowed to the one distinction the layout needs. */
 export function useBreakpoint() {
   const width = ref(typeof window === 'undefined' ? DESKTOP_PX : window.innerWidth)
   const onResize = () => (width.value = window.innerWidth)

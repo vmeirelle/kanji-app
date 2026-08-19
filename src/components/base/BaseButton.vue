@@ -5,7 +5,7 @@ import { useTheme, Size, Color, Variant } from '../../composables/useTheme'
 const props = withDefaults(
   defineProps<{
     variant?: Variant
-    size?: Size // Sm or Md
+    size?: Size
     block?: boolean
     disabled?: boolean
   }>(),
@@ -15,7 +15,6 @@ const emit = defineEmits<{ click: [] }>()
 
 const theme = useTheme()
 
-// variant → [background, border, text] color tokens
 const palette: Record<Variant, [Color, Color, Color]> = {
   [Variant.Primary]: [Color.Brand, Color.Brand, Color.OnBrand],
   [Variant.Plain]: [Color.Surface, Color.Border, Color.Heading],

@@ -39,7 +39,7 @@ const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
   inset: 0;
   z-index: 20;
 }
-/* Desktop navigates with the header tabs, so the drawer never shows. */
+
 @media (min-width: 48rem) {
   .wrap {
     display: none;
@@ -79,7 +79,7 @@ const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
   padding: 0.25rem 0.5rem;
 }
 .brand {
-  margin-left: auto; /* push the logo to the right edge */
+  margin-left: auto; 
   padding: 0 0.5rem;
   border: none;
   background: transparent;
@@ -120,7 +120,6 @@ const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
   text-align: center;
 }
 
-/* Backdrop fades; panel slides in from the left. */
 .drawer-enter-active,
 .drawer-leave-active {
   transition: opacity 0.25s ease;

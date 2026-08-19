@@ -1,19 +1,15 @@
 import type { Kanji } from './data/blocks'
 
-/** A renderable facet of a kanji — extend by adding a key to `Kanji`. */
 export type Format = keyof Kanji
 
-/** A quiz mode maps the prompt facet to the answer facet. Add modes freely. */
 export type Mode = { id: string; label: string; prompt: Format; answer: Format }
 
-/** The facets the user can toggle From/To. Add a row to expose a new facet. */
 export const FORMATS: { id: Format; label: string }[] = [
   { id: 'char', label: 'Kanji' },
   { id: 'kana', label: 'Kana' },
   { id: 'meaning', label: 'English' },
 ]
 
-/** Build a mode from a chosen prompt + answer facet. */
 export const modeOf = (prompt: Format, answer: Format): Mode => ({
   id: `${prompt}-${answer}`,
   label: `${prompt}→${answer}`,
@@ -21,7 +17,6 @@ export const modeOf = (prompt: Format, answer: Format): Mode => ({
   answer,
 })
 
-/** All three renderings of a kanji, for the reveal cards. */
 export type Facets = { char: string; kana: string; meaning: string }
 export type Option = { key: string; label: string; correct: boolean; facets: Facets }
 export type Question = { prompt: string; target: Facets; options: Option[] }
@@ -39,11 +34,6 @@ export function shuffle<T>(xs: T[]): T[] {
   return a
 }
 
-/**
- * Build one question: the prompt rendered in `mode.prompt`, and up to `count`
- * answer squares rendered in `mode.answer`. Distractors are drawn from `pool`
- * and deduped by their answer label, so no two squares ever read the same.
- */
 export function buildQuestion(
   target: Kanji,
   pool: Kanji[],
