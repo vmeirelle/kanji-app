@@ -66,7 +66,7 @@ const when = (iso: string) => new Date(iso).toLocaleString()
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding-top: 1.25rem;
+  padding: 1.25rem 0.5rem 0;
 }
 .lesson {
   padding: 0.85rem;

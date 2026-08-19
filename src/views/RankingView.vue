@@ -111,6 +111,7 @@ const onEnd = (e: TouchEvent) => {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  padding-right: 0.5rem;
 }
 .daynav {
   display: flex;

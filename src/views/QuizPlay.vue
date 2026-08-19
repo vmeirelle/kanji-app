@@ -42,6 +42,7 @@ const progress = computed(() =>
 <style scoped>
 .play {
   overflow-y: auto;
+  padding-right: 0.4rem;
 }
 .bar {
   display: flex;

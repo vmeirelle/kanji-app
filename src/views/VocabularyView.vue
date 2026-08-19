@@ -48,7 +48,7 @@ const emit = defineEmits<{ practice: [] }>()
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding-top: 1.5rem;
+  padding: 1.5rem 0.5rem 0;
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
