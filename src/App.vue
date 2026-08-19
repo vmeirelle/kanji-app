@@ -3,16 +3,20 @@ import { onMounted, ref } from 'vue'
 import { useQuiz } from './composables/useQuiz'
 import { useRankings } from './composables/useRankings'
 import { useBreakpoint } from './composables/useBreakpoint'
+import AppBrand from './components/base/AppBrand.vue'
+import KanjiBadge from './components/base/KanjiBadge.vue'
 import LearnView from './views/LearnView.vue'
 import RankingView from './views/RankingView.vue'
 import SavedView from './views/SavedView.vue'
 import NotFound from './views/NotFound.vue'
 import NavDrawer, { type NavItem } from './components/base/NavDrawer.vue'
+import BaseText from './components/base/BaseText.vue'
+import { Size } from './composables/useTheme'
 
 const NAV: NavItem[] = [
-  { id: 'learn', label: 'Learn', icon: '📖' },
-  { id: 'saved', label: 'Unfinished', icon: '⏸️' },
-  { id: 'ranking', label: 'Ranking', icon: '🏆' },
+  { id: 'learn', label: 'Learn', kanji: '学' },
+  { id: 'saved', label: 'Unfinished', kanji: '未' },
+  { id: 'ranking', label: 'Ranking', kanji: '位' },
 ]
 
 const q = useQuiz()
@@ -46,7 +50,7 @@ function resumeLesson(id: string) {
   <div class="shell">
     <aside class="side">
       <button class="side-brand" aria-label="Home" @click="goHome">
-        <img class="logo" src="/logo.png" alt="Kanji Quiz" />
+        <AppBrand />
       </button>
       <nav class="tabs">
         <button
@@ -56,16 +60,18 @@ function resumeLesson(id: string) {
           :class="{ active: item.id === view }"
           @click="go(item.id)"
         >
-          <span v-if="item.icon" class="ic">{{ item.icon }}</span>{{ item.label }}
+          <KanjiBadge :char="item.kanji" round :size="1.7" />{{ item.label }}
         </button>
       </nav>
     </aside>
 
     <main class="app">
       <header class="top">
-        <button class="ham" aria-label="Menu" @click="menuOpen = !menuOpen">☰</button>
+        <button class="ham" aria-label="Menu" @click="menuOpen = !menuOpen">
+          <BaseText :size="Size.Lg">☰</BaseText>
+        </button>
         <button class="brand" aria-label="Home" @click="goHome">
-          <img class="logo" src="/logo.png" alt="Kanji Quiz" />
+          <AppBrand end />
         </button>
       </header>
 
@@ -130,17 +136,13 @@ function resumeLesson(id: string) {
   padding: 0;
   cursor: pointer;
 }
-.logo {
-  height: 2.6rem;
-  border-radius: 0.5rem;
-}
 .side {
   display: none;
 }
 .side-brand {
   border: none;
   background: transparent;
-  padding: 0 0.5rem;
+  padding: 0 0.75rem;
   cursor: pointer;
   align-self: flex-start;
 }

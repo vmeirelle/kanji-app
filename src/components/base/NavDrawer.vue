@@ -1,5 +1,8 @@
 <script setup lang="ts">
-export type NavItem = { id: string; label: string; icon?: string }
+import AppBrand from './AppBrand.vue'
+import KanjiBadge from './KanjiBadge.vue'
+
+export type NavItem = { id: string; label: string; kanji: string }
 
 defineProps<{ open: boolean; items: NavItem[]; active: string }>()
 const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
@@ -11,9 +14,8 @@ const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
       <div class="backdrop" @click="emit('close')" />
       <aside class="panel">
         <div class="top">
-          <button class="ham" aria-label="Home" @click="emit('home')">☰</button>
           <button class="brand" aria-label="Home" @click="emit('home')">
-            <img class="brand-logo" src="/logo.png" alt="Kanji Quiz" />
+            <AppBrand />
           </button>
         </div>
         <nav class="nav">
@@ -24,7 +26,7 @@ const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
             :class="{ active: item.id === active }"
             @click="emit('select', item.id)"
           >
-            <span v-if="item.icon" class="ic">{{ item.icon }}</span>
+            <KanjiBadge :char="item.kanji" round :size="1.7" />
             <span>{{ item.label }}</span>
           </button>
         </nav>
@@ -67,27 +69,12 @@ const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
 .top {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-}
-.ham {
-  border: none;
-  background: transparent;
-  color: var(--color-heading);
-  font-size: 1.4rem;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
 }
 .brand {
-  margin-left: auto; 
   padding: 0 0.5rem;
   border: none;
   background: transparent;
   cursor: pointer;
-}
-.brand-logo {
-  height: 3rem;
-  border-radius: 0.5rem;
 }
 .nav {
   display: flex;
@@ -114,10 +101,6 @@ const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
   background: var(--color-background-soft);
   color: var(--brand);
   font-weight: 600;
-}
-.ic {
-  width: 1.25rem;
-  text-align: center;
 }
 
 .drawer-enter-active,
