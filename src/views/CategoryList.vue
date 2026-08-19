@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { blocksIn, levelColor, levelsOf, type Block } from '../data/blocks'
+import FadeTransition from '../components/base/FadeTransition.vue'
 
 const props = defineProps<{ blocks: Block[]; selected: string[]; disabled?: boolean }>()
 const emit = defineEmits<{ 'update:selected': [string[]] }>()
@@ -10,6 +11,9 @@ const groups = computed(() =>
 )
 const has = (id: string) => props.selected.includes(id)
 const countOn = (blocks: Block[]) => blocks.filter((b) => has(b.id)).length
+
+// Changing level swaps the whole set — crossfade it (no movement).
+const levelKey = computed(() => levelsOf(props.blocks).join('-'))
 
 function toggle(id: string) {
   if (props.disabled) return
@@ -32,7 +36,8 @@ function toggleGroup(blocks: Block[]) {
 </script>
 
 <template>
-  <div class="groups" :class="{ locked: disabled }">
+  <FadeTransition>
+  <div class="groups" :class="{ locked: disabled }" :key="levelKey">
     <section
       v-for="g in groups"
       :key="g.level"
@@ -59,13 +64,14 @@ function toggleGroup(blocks: Block[]) {
           @click="toggle(b.id)"
         >
           <span class="bg-kanji" aria-hidden="true">{{ b.kanji[0]?.char }}</span>
-          <span v-if="has(b.id)" class="check" aria-hidden="true">x</span>
+          <span class="check" :class="{ show: has(b.id) }" aria-hidden="true">x</span>
           <span class="name">{{ b.name }}</span>
           <span class="n">{{ b.kanji.length }}</span>
         </button>
       </div>
     </section>
   </div>
+  </FadeTransition>
 </template>
 
 <style scoped>
@@ -119,7 +125,8 @@ function toggleGroup(blocks: Block[]) {
   background: var(--color-background-soft);
   color: var(--color-text);
   cursor: pointer;
-  transition: transform 0.08s, border-color 0.15s, background 0.15s, color 0.15s;
+  transition: transform 0.12s ease, border-color 0.3s ease, background 0.3s ease,
+    color 0.3s ease;
 }
 .bg-kanji {
   position: absolute;
@@ -140,6 +147,17 @@ function toggleGroup(blocks: Block[]) {
   font-size: 0.72rem;
   line-height: 1;
   z-index: 1;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+.check.show {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile,
+  .check {
+    transition: none;
+  }
 }
 .tile:active {
   transform: scale(0.96);

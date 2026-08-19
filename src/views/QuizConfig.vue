@@ -4,6 +4,7 @@ import { useQuiz } from '../composables/useQuiz'
 import { levelColor } from '../data/blocks'
 import { FORMATS } from '../quiz'
 import BaseSegment from '../components/base/BaseSegment.vue'
+import PageHeader from '../components/base/PageHeader.vue'
 import CategoryList from './CategoryList.vue'
 
 const q = useQuiz()
@@ -33,8 +34,7 @@ const shownSelected = computed(() =>
 
 <template>
   <section class="pick" :style="{ '--lv': levelColor(q.level.value) }">
-    <header class="today">
-    </header>
+    <PageHeader jp="今日の稽古" title="Today's practice" image="/reading.png" />
 
     <div class="card">
       <span class="tag">Game</span>
@@ -138,39 +138,6 @@ const shownSelected = computed(() =>
 }
 .cats::-webkit-scrollbar-thumb:hover {
   background: color-mix(in srgb, var(--lv, var(--brand)) 70%, transparent);
-}
-.today {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding-top: 1rem;
-  border-bottom: 1px solid var(--color-border);
-}
-.today-text {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.jp {
-  font-family: var(--font-kanji);
-  color: var(--lv, var(--brand));
-}
-.title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  line-height: 1.1;
-  color: var(--color-heading);
-}
-.count {
-  font-size: 0.85rem;
-  color: var(--color-text);
-  font-variant-numeric: tabular-nums;
-}
-.mascot {
-  width: 4.5rem;
-  height: auto;
-  flex: none;
 }
 .card {
   display: flex;

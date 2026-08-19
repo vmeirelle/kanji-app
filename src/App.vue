@@ -5,6 +5,7 @@ import { useRankings } from './composables/useRankings'
 import { useBreakpoint } from './composables/useBreakpoint'
 import AppBrand from './components/base/AppBrand.vue'
 import KanjiBadge from './components/base/KanjiBadge.vue'
+import FadeTransition from './components/base/FadeTransition.vue'
 import LearnView from './views/LearnView.vue'
 import RankingView from './views/RankingView.vue'
 import SavedView from './views/SavedView.vue'
@@ -85,18 +86,20 @@ function resumeLesson(id: string) {
         @close="menuOpen = false"
       />
 
-      <LearnView v-if="view === 'learn'" />
+      <FadeTransition>
+        <LearnView v-if="view === 'learn'" />
 
-      <SavedView
-        v-else-if="view === 'saved'"
-        :lessons="q.savedLessons.value"
-        @resume="resumeLesson"
-        @drop="q.drop"
-      />
+        <SavedView
+          v-else-if="view === 'saved'"
+          :lessons="q.savedLessons.value"
+          @resume="resumeLesson"
+          @drop="q.drop"
+        />
 
-      <RankingView v-else-if="view === 'ranking'" :rankings="rankings" :levels="q.levels.value" />
+        <RankingView v-else-if="view === 'ranking'" :rankings="rankings" :levels="q.levels.value" />
 
-      <NotFound v-else />
+        <NotFound v-else />
+      </FadeTransition>
     </main>
   </div>
 </template>

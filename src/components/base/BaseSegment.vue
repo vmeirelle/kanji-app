@@ -62,7 +62,7 @@ function select(o: SegOption<T>) {
   font-size: 0.95rem;
   line-height: 1.2;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.25s ease, color 0.25s ease;
 }
 .seg-btn:first-child {
   border-left: none;

@@ -66,7 +66,8 @@ function stateStyle(item: GridItem): CSSProperties {
   line-height: 1.2;
   text-align: center;
   cursor: pointer;
-  transition: transform 0.08s, border-color 0.2s, background 0.2s;
+  transition: transform 0.12s ease, border-color 0.3s ease, background 0.3s ease,
+    color 0.3s ease;
 }
 .square:active:not(:disabled) {
   transform: scale(0.96);

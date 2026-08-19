@@ -48,35 +48,39 @@ const items = computed<GridItem[]>(() =>
           <div class="glyph">{{ prompt }}</div>
         </div>
         <div class="face back" :class="verdict">
-          <button
-            v-if="supported"
-            type="button"
-            class="say glyph small"
-            aria-label="Play pronunciation"
-            @click.stop="speak(question.target.kana)"
-          >
-            {{ question.target.char }}
-          </button>
-          <div v-else class="glyph small">{{ question.target.char }}</div>
-          <dl class="info">
-            <div>
-              <dt>Reading</dt>
-              <dd>
-                <button
-                  v-if="supported"
-                  type="button"
-                  class="say-word"
-                  aria-label="Play pronunciation"
-                  @click.stop="speak(question.target.kana)"
-                >
-                  {{ question.target.kana }}
-                  <span class="say-icon">🔊</span>
-                </button>
-                <template v-else>{{ question.target.kana }}</template>
-              </dd>
-            </div>
-            <div><dt>Meaning</dt><dd>{{ question.target.meaning }}</dd></div>
-          </dl>
+          <!-- Only render while answered, so the flip-back to the next question
+               never briefly reveals its answer. -->
+          <template v-if="chosenKey">
+            <button
+              v-if="supported"
+              type="button"
+              class="say glyph small"
+              aria-label="Play pronunciation"
+              @click.stop="speak(question.target.kana)"
+            >
+              {{ question.target.char }}
+            </button>
+            <div v-else class="glyph small">{{ question.target.char }}</div>
+            <dl class="info">
+              <div>
+                <dt>Reading</dt>
+                <dd>
+                  <button
+                    v-if="supported"
+                    type="button"
+                    class="say-word"
+                    aria-label="Play pronunciation"
+                    @click.stop="speak(question.target.kana)"
+                  >
+                    {{ question.target.kana }}
+                    <span class="say-icon">🔊</span>
+                  </button>
+                  <template v-else>{{ question.target.kana }}</template>
+                </dd>
+              </div>
+              <div><dt>Meaning</dt><dd>{{ question.target.meaning }}</dd></div>
+            </dl>
+          </template>
         </div>
       </div>
     </div>

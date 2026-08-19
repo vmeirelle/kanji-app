@@ -4,3 +4,21 @@
   min-height: 100vh;
   width: 100%;
 }
+
+/* Shared sober crossfade (FadeTransition) — no movement. Global so it applies
+   to slotted content regardless of component scope. */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.22s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-enter-active,
+  .fade-leave-active {
+    transition: none;
+  }
+}

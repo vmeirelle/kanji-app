@@ -1,11 +1,19 @@
 <script setup lang="ts">
 import { computed, type CSSProperties } from 'vue'
 
+// Constrain by width OR height (in rem) — the other stays auto so the image
+// scales proportionally without distortion. `size` is a width shorthand.
 const props = withDefaults(
-  defineProps<{ src: string; alt?: string; size?: number }>(),
-  { alt: '', size: 8 },
+  defineProps<{ src: string; alt?: string; width?: number; height?: number; size?: number }>(),
+  { alt: '' },
 )
-const style = computed<CSSProperties>(() => ({ width: `${props.size}rem` }))
+const style = computed<CSSProperties>(() => {
+  const w = props.width ?? props.size
+  return {
+    width: w != null ? `${w}rem` : undefined,
+    height: props.height != null ? `${props.height}rem` : undefined,
+  }
+})
 </script>
 
 <template>
@@ -16,6 +24,6 @@ const style = computed<CSSProperties>(() => ({ width: `${props.size}rem` }))
 .base-image {
   display: block;
   max-width: 100%;
-  height: auto;
+  object-fit: contain;
 }
 </style>

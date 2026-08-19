@@ -4,6 +4,8 @@ import { today, addDays, points, type Ranking } from '../rankings'
 import { levelColor } from '../data/blocks'
 import EmptyState from '../components/base/EmptyState.vue'
 import BaseSegment from '../components/base/BaseSegment.vue'
+import FadeTransition from '../components/base/FadeTransition.vue'
+import PageHeader from '../components/base/PageHeader.vue'
 
 const props = defineProps<{ rankings: Ranking[]; levels: string[] }>()
 
@@ -57,6 +59,8 @@ const onEnd = (e: TouchEvent) => {
 
 <template>
   <section class="rank" @touchstart.passive="onStart" @touchend="onEnd">
+    <PageHeader jp="番付" title="Ranking" image="/happy.png" />
+
     <div class="daynav">
       <button class="chev" aria-label="Previous day" @click="older">‹</button>
       <span class="daylabel">{{ dayLabel }}</span>
@@ -65,29 +69,47 @@ const onEnd = (e: TouchEvent) => {
 
     <BaseSegment class="filter-seg" :options="filterOptions" v-model="level" />
 
-    <EmptyState v-if="!groups.length" src="/lost.png">
-      No scores on this day.<template v-if="isToday"> Play a ranked round to put a name up here.</template>
-    </EmptyState>
+    <div class="scroll">
+      <FadeTransition>
+        <div class="results" :key="day + '|' + level">
+        <EmptyState v-if="!groups.length" src="/lost.png">
+          No scores on this day.<template v-if="isToday"> Play a ranked round to put a name up here.</template>
+        </EmptyState>
 
-    <div v-for="g in groups" :key="g.level" class="block" :style="{ '--lv': levelColor(g.level) }">
-      <div class="block-name">
-        <span class="lv">{{ g.level }}</span>
-        <span class="cnt">{{ g.entries.length }}</span>
+        <div
+          v-for="g in groups"
+          :key="g.level"
+          class="block"
+          :style="{ '--lv': levelColor(g.level) }"
+        >
+          <div class="block-name">
+            <span class="lv">{{ g.level }}</span>
+            <span class="cnt">{{ g.entries.length }}</span>
+          </div>
+          <div class="list">
+            <li v-for="(r, i) in g.entries" :key="i" class="row">
+              <span class="pos">{{ i + 1 }}</span>
+              <span class="name">{{ r.name }}</span>
+              <span class="xy">{{ r.correct }}/{{ r.total }}</span>
+              <span class="pts">{{ points(r) }} pts</span>
+            </li>
+          </div>
+        </div>
       </div>
-      <div class="list">
-        <li v-for="(r, i) in g.entries" :key="i" class="row">
-          <span class="pos">{{ i + 1 }}</span>
-          <span class="name">{{ r.name }}</span>
-          <span class="xy">{{ r.correct }}/{{ r.total }}</span>
-          <span class="pts">{{ points(r) }} pts</span>
-        </li>
-      </div>
+      </FadeTransition>
     </div>
   </section>
 </template>
 
 <style scoped>
 .rank {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.scroll {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   scrollbar-gutter: stable;
   scrollbar-width: thin;
@@ -98,6 +120,7 @@ const onEnd = (e: TouchEvent) => {
   align-items: center;
   justify-content: center;
   gap: 1rem;
+  margin-top: 1.25rem;
   margin-bottom: 1rem;
 }
 .chev {
