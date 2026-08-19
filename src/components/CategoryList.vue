@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { byLevel, type Block } from '../data/blocks'
+import type { Block } from '../data/blocks'
 
 const props = defineProps<{ blocks: Block[]; selected: string[] }>()
 const emit = defineEmits<{ 'update:selected': [string[]] }>()
 
-const groups = computed(() => byLevel(props.blocks))
 const has = (id: string) => props.selected.includes(id)
 
 function toggle(id: string) {
@@ -15,40 +13,30 @@ function toggle(id: string) {
   )
 }
 
-/** Tapping the level header takes all of it, or drops all of it. */
-function toggleLevel(ids: string[]) {
-  emit(
-    'update:selected',
-    ids.every(has)
-      ? props.selected.filter((x) => !ids.includes(x))
-      : [...new Set([...props.selected, ...ids])],
-  )
+function toggleAll() {
+  const ids = props.blocks.map((b) => b.id)
+  emit('update:selected', ids.every(has) ? [] : ids)
 }
 </script>
 
 <template>
-  <div class="levels">
-    <section v-for="g in groups" :key="g.level" class="level">
-      <button class="head" @click="toggleLevel(g.blocks.map((b) => b.id))">
-        <span class="tag">{{ g.level }}</span>
-        <span class="all">{{ g.blocks.every((b) => has(b.id)) ? 'None' : 'All' }}</span>
+  <div class="list">
+    <div class="head">
+      <span class="tag">Categories</span>
+      <button class="all" @click="toggleAll">
+        {{ blocks.every((b) => has(b.id)) ? 'None' : 'All' }}
       </button>
-      <label v-for="b in g.blocks" :key="b.id" class="row" :class="{ on: has(b.id) }">
-        <input type="checkbox" :checked="has(b.id)" @change="toggle(b.id)" />
-        <span class="name">{{ b.name }}</span>
-        <span class="count">{{ b.kanji.length }}</span>
-      </label>
-    </section>
+    </div>
+    <label v-for="b in blocks" :key="b.id" class="row" :class="{ on: has(b.id) }">
+      <input type="checkbox" :checked="has(b.id)" @change="toggle(b.id)" />
+      <span class="name">{{ b.name }}</span>
+      <span class="count">{{ b.kanji.length }}</span>
+    </label>
   </div>
 </template>
 
 <style scoped>
-.levels {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-.level {
+.list {
   display: flex;
   flex-direction: column;
 }
@@ -57,19 +45,19 @@ function toggleLevel(ids: string[]) {
   align-items: center;
   justify-content: space-between;
   padding: 0.25rem 0.25rem 0.5rem;
-  border: none;
-  background: transparent;
-  cursor: pointer;
 }
 .tag {
   font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--color-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text);
 }
 .all {
+  border: none;
+  background: transparent;
   font-size: 0.8rem;
-  color: #16a34a;
+  color: var(--brand);
+  cursor: pointer;
 }
 .row {
   display: grid;
@@ -89,7 +77,7 @@ function toggleLevel(ids: string[]) {
 input {
   width: 1.1rem;
   height: 1.1rem;
-  accent-color: #16a34a;
+  accent-color: var(--brand);
 }
 .count {
   font-size: 0.85rem;

@@ -2,7 +2,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { useQuiz } from './useQuiz'
 import { loadRankings, addRanking, today, type Ranking } from './rankings'
-import SquareGrid, { type GridItem } from './components/SquareGrid.vue'
 import CategoryList from './components/CategoryList.vue'
 import QuizView from './components/QuizView.vue'
 import RankingView from './components/RankingView.vue'
@@ -75,9 +74,13 @@ function finish() {
 
     <!-- LEARN -->
     <template v-if="view === 'learn'">
-      <!-- Pick categories, by level. Remembered, so it is one tap next time. -->
+      <!-- Pick categories for the level set in Settings. Remembered between rounds. -->
       <section v-if="q.phase.value === 'ready'" class="pick">
-        <CategoryList :blocks="q.blocks.value" v-model:selected="q.selected.value" />
+        <p class="level-note">
+          Level <strong>{{ q.level.value }}</strong> —
+          <button class="link" @click="go('settings')">change</button>
+        </p>
+        <CategoryList :blocks="q.levelBlocks.value" v-model:selected="q.selected.value" />
         <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
           Start · {{ q.poolSize.value }} kanji
         </button>
@@ -142,7 +145,13 @@ function finish() {
     <RankingView v-else-if="view === 'ranking'" :rankings="rankings" />
 
     <!-- SETTINGS -->
-    <SettingsView v-else v-model:from="q.from.value" v-model:to="q.to.value" />
+    <SettingsView
+      v-else
+      v-model:from="q.from.value"
+      v-model:to="q.to.value"
+      v-model:level="q.level.value"
+      :levels="q.levels.value"
+    />
   </main>
 </template>
 
@@ -182,7 +191,23 @@ function finish() {
 .pick {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
+}
+.level-note {
+  font-size: 0.85rem;
+  color: var(--color-text);
+}
+.level-note strong {
+  color: var(--color-heading);
+}
+.link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--brand);
+  text-decoration: underline;
+  cursor: pointer;
 }
 .lead {
   text-align: center;

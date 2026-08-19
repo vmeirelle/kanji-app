@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { FORMATS, modeOf, buildQuestion } from './quiz'
 import blocks from './data/blocks.json'
-import { byLevel, poolOf, type Block, type Kanji } from './data/blocks'
+import { blocksAt, levelsOf, poolOf, type Block, type Kanji } from './data/blocks'
 
 const pool: Kanji[] = Array.from({ length: 12 }, (_, i) => ({
   char: `c${i}`,
@@ -56,11 +56,18 @@ describe('seed data yields 9 options for every kanji and answer format', () => {
 describe('category selection', () => {
   const all = blocks as Block[]
 
-  it('groups blocks by level, N5 first, keeping every block', () => {
-    const groups = byLevel(all)
-    expect(groups[0]!.level).toBe('N5')
-    expect(groups.flatMap((g) => g.blocks)).toHaveLength(all.length)
-    expect(new Set(groups.map((g) => g.level)).size).toBe(groups.length)
+  it('lists each level once, easiest first, covering every block', () => {
+    const levels = levelsOf(all)
+    expect(levels[0]).toBe('N5')
+    expect(new Set(levels).size).toBe(levels.length)
+    expect(levels.flatMap((l) => blocksAt(all, l))).toHaveLength(all.length)
+  })
+
+  it('offers only the chosen level\'s categories', () => {
+    const n5 = blocksAt(all, 'N5')
+    expect(n5.length).toBeGreaterThan(1)
+    expect(n5.every((b) => b.level === 'N5')).toBe(true)
+    expect(blocksAt(all, 'N1')).toHaveLength(0)
   })
 
   it('pools only the selected categories', () => {

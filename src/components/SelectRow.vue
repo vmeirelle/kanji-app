@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { FORMATS, type Format } from '../quiz'
-
-defineProps<{ label: string; modelValue: Format }>()
-const emit = defineEmits<{ 'update:modelValue': [Format] }>()
+/** One settings row: a label and a native select. */
+defineProps<{ label: string; options: { id: string; label: string }[]; modelValue: string }>()
+const emit = defineEmits<{ 'update:modelValue': [string] }>()
 </script>
 
 <template>
@@ -11,9 +10,9 @@ const emit = defineEmits<{ 'update:modelValue': [Format] }>()
     <select
       class="sel"
       :value="modelValue"
-      @change="emit('update:modelValue', ($event.target as HTMLSelectElement).value as Format)"
+      @change="emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
     >
-      <option v-for="f in FORMATS" :key="f.id" :value="f.id">{{ f.label }}</option>
+      <option v-for="o in options" :key="o.id" :value="o.id">{{ o.label }}</option>
     </select>
   </label>
 </template>
