@@ -328,10 +328,13 @@ function finish() {
 
 /* Desktop: a standing sidebar replaces the header and the drawer. */
 @media (min-width: 48rem) {
-  /* Sidebar hugs the left edge; the content centres in whatever is left. */
+  /* The sidebar + content form one bounded slab, centred on the page, so wide
+     screens get balanced margins instead of a lone column floating far right. */
   .shell {
     display: grid;
     grid-template-columns: 13rem minmax(0, 1fr);
+    max-width: 72rem;
+    margin: 0 auto;
   }
   .side {
     display: flex;
@@ -348,7 +351,8 @@ function finish() {
     display: none; /* logo and nav live in the sidebar */
   }
   .app {
-    max-width: 52rem;
+    max-width: none; /* fill the content column of the bounded slab */
+    margin: 0;
     padding: 1.5rem 1.5rem 3rem;
   }
 }
