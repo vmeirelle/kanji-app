@@ -33,8 +33,7 @@
   --color-text: var(--vt-c-text-light-1);
 
 
-  --brand: #2a2a2e;
-  --brand-navy: #141416;
+  --brand: #444444;
 
 
   /* JLPT levels: distinct, muted-rich hues (indigo -> rose). */
@@ -66,22 +65,23 @@
   --section-gap: 160px;
 }
 
-/* Dark values, shared by system-dark (no explicit theme) and forced dark. */
+/* Warm night palette, shared by system-dark and forced dark. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
-    --lv-N5: #6ba6cf;
-    --lv-N4: #5fb890;
-    --lv-N3: #e6b855;
-    --lv-N2: #ec8759;
-    --lv-N1: #d76578;
-    --color-background: var(--vt-c-black);
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
-    --color-border: var(--vt-c-divider-dark-2);
-    --color-border-hover: var(--vt-c-divider-dark-1);
-    --color-heading: var(--vt-c-text-dark-1);
-    --color-text: var(--vt-c-text-dark-2);
-    --brand: #2a2a2e;
+    --lv-N5: #6ea9cf;
+    --lv-N4: #63bd93;
+    --lv-N3: #e8bd5e;
+    --lv-N2: #ef8b5c;
+    --lv-N1: #dd6a7c;
+    --color-background: #555555;
+    --color-background-soft: #555555;
+    --color-background-mute: #555555;
+    --color-border: rgba(233, 227, 214, 0.13);
+    --color-border-hover: rgba(233, 227, 214, 0.26);
+    --color-heading: #f4efe5;
+    --color-text: rgba(237, 232, 222, 0.68);
+    --brand: var(--brand);
+    --accent: #ece3d0;
     --ok: #8ecaa0;
     --ok-soft: #8ecaa030;
     --danger: #ec949a;
@@ -89,26 +89,27 @@
   }
 }
 :root[data-theme='dark'] {
-  --lv-N5: #6ba6cf;
-  --lv-N4: #5fb890;
-  --lv-N3: #e6b855;
-  --lv-N2: #ec8759;
-  --lv-N1: #d76578;
-  --color-background: var(--vt-c-black);
-  --color-background-soft: var(--vt-c-black-soft);
-  --color-background-mute: var(--vt-c-black-mute);
-  --color-border: var(--vt-c-divider-dark-2);
-  --color-border-hover: var(--vt-c-divider-dark-1);
-  --color-heading: var(--vt-c-text-dark-1);
-  --color-text: var(--vt-c-text-dark-2);
-  --brand: #2a2a2e;
+  --lv-N5: #6ea9cf;
+  --lv-N4: #63bd93;
+  --lv-N3: #e8bd5e;
+  --lv-N2: #ef8b5c;
+  --lv-N1: #dd6a7c;
+  --color-background: #17171b;
+  --color-background-soft: #202027;
+  --color-background-mute: #2b2b33;
+  --color-border: rgba(233, 227, 214, 0.13);
+  --color-border-hover: rgba(233, 227, 214, 0.26);
+  --color-heading: #f4efe5;
+  --color-text: rgba(237, 232, 222, 0.68);
+  --brand: #3b3b44;
+  --accent: #ece3d0;
   --ok: #8ecaa0;
   --ok-soft: #8ecaa030;
   --danger: #ec949a;
   --danger-soft: #ec949a30;
 }
 
-/* Accessibility: collapse all JLPT level accents to one neutral brand colour. */
+/* Accessibility: collapse all JLPT level accents to one soft neutral. */
 :root.no-lv {
   --lv-N5: var(--brand);
   --lv-N4: var(--brand);

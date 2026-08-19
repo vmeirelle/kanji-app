@@ -34,7 +34,7 @@ defineProps<{ title: string; jp?: string; image?: string }>()
 .jp {
   font-family: var(--font-kanji);
   font-size: 0.8rem;
-  color: var(--lv, var(--brand));
+  color: var(--lv, var(--accent));
 }
 .title {
   font-size: 1.6rem;

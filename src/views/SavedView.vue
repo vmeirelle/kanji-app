@@ -21,7 +21,7 @@ const when = (iso: string) => new Date(iso).toLocaleString()
 
 <template>
   <div class="saved">
-    <PageHeader jp="未完の稽古" title="Unfinished" image="/writing.png" />
+    <PageHeader jp="未完の稽古" title="Unfinished" image="/reading.png" />
 
     <div class="scroll">
       <EmptyState v-if="!lessons.length" src="/peace.png">

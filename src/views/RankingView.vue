@@ -203,7 +203,7 @@ const onEnd = (e: TouchEvent) => {
   font-variant-numeric: tabular-nums;
 }
 .pts {
-  color: var(--brand);
+  color: var(--accent);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }

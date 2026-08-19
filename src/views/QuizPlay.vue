@@ -57,7 +57,7 @@ const progress = computed(() =>
   gap: 0.75rem;
 }
 .tally .pts {
-  color: var(--brand);
+  color: var(--accent);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }

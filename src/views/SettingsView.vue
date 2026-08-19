@@ -28,7 +28,7 @@ const onOff = [
 
 <template>
   <section class="settings">
-    <PageHeader jp="設定" title="Settings" image="/happy.png" />
+    <PageHeader jp="設定" title="Settings" image="/writing.png" />
 
     <div class="scroll">
       <div class="group">

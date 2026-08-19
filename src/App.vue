@@ -184,7 +184,7 @@ function resumeLesson(id: string) {
 }
 .tab.active {
   background: var(--color-background-soft);
-  color: var(--brand);
+  color: var(--accent);
   font-weight: 600;
 }
 
