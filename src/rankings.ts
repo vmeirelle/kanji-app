@@ -5,8 +5,12 @@ export type Ranking = {
   blockId: string
   blockName: string
   pct: number // first-try accuracy, 0–100
-  date: string // ISO
+  day: string // local calendar day, YYYY-MM-DD (leaderboards are per block + day)
+  date: string // full ISO timestamp
 }
+
+/** Local calendar day as YYYY-MM-DD (en-CA formats that way). */
+export const today = (): string => new Date().toLocaleDateString('en-CA')
 
 const KEY = 'kanji-rankings.v1'
 

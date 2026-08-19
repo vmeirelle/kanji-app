@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useQuiz } from './useQuiz'
-import { loadRankings, addRanking, type Ranking } from './rankings'
+import { loadRankings, addRanking, today, type Ranking } from './rankings'
 import SquareGrid, { type GridItem } from './components/SquareGrid.vue'
 import QuizView from './components/QuizView.vue'
 import RankingView from './components/RankingView.vue'
@@ -47,6 +47,7 @@ function saveScore() {
     blockId: q.block.value.id,
     blockName: q.blockName.value,
     pct: q.pct.value,
+    day: today(),
     date: new Date().toISOString(),
   })
   saved.value = true
