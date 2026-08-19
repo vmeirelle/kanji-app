@@ -70,15 +70,18 @@ const onEnd = (e: TouchEvent) => {
     </EmptyState>
 
     <div v-for="g in groups" :key="g.level" class="block" :style="{ '--lv': levelColor(g.level) }">
-      <h2 class="block-name"><span class="lv">{{ g.level }}</span></h2>
-      <ol class="list">
+      <div class="block-name">
+        <span class="lv">{{ g.level }}</span>
+        <span class="cnt">{{ g.entries.length }}</span>
+      </div>
+      <div class="list">
         <li v-for="(r, i) in g.entries" :key="i" class="row">
           <span class="pos">{{ i + 1 }}</span>
           <span class="name">{{ r.name }}</span>
           <span class="xy">{{ r.correct }}/{{ r.total }}</span>
           <span class="pts">{{ points(r) }} pts</span>
         </li>
-      </ol>
+      </div>
     </div>
   </section>
 </template>
@@ -121,13 +124,26 @@ const onEnd = (e: TouchEvent) => {
   margin-bottom: 1.5rem;
 }
 .block-name {
-  font-size: 1.05rem;
-  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.45rem 0.85rem;
+  margin-bottom: 0.6rem;
+  border-radius: 0.6rem;
+  background: var(--lv, var(--color-heading));
 }
 .lv {
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--lv, var(--color-heading));
+  letter-spacing: 0.08em;
+  color: #fff;
+}
+.cnt {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  opacity: 0.85;
+  font-variant-numeric: tabular-nums;
 }
 .list {
   list-style: none;
