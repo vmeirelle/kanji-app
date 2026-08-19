@@ -115,56 +115,47 @@ function finish() {
     <template v-if="view === 'learn'">
       <!-- Levels mix freely; categories follow whatever is checked. Both remembered. -->
       <section v-if="q.phase.value === 'ready'" class="pick">
-        <div class="field">
-          <span class="tag">Difficulty</span>
-          <div class="chips" role="group" aria-label="Difficulty">
-            <label
+        <div class="card">
+          <span class="tag">Japanese level</span>
+          <div class="seg">
+            <button
               v-for="l in q.levels.value"
               :key="l"
-              class="chip"
-              :class="{ on: q.chosenLevels.value.includes(l) }"
+              type="button"
+              class="seg-btn"
+              :class="{ on: q.level.value === l }"
               :style="{ '--lv': levelColor(l) }"
+              :aria-pressed="q.level.value === l"
+              @click="q.setLevel(l)"
             >
-              <input
-                class="sr"
-                type="checkbox"
-                :checked="q.chosenLevels.value.includes(l)"
-                :disabled="q.isOnlyLevel(l)"
-                @change="q.toggleLevel(l)"
-              />
-              {{ l }}
-            </label>
+              <span class="seg-main">{{ l }}</span>
+            </button>
           </div>
-        </div>
 
-        <div class="field">
-          <span class="tag">Kanji per round</span>
-          <div class="chips" role="radiogroup" aria-label="Kanji per round">
-            <label
+          <div class="head">
+            <span class="tag">Kanji per round</span>
+            <span class="sub">{{ q.roundSize.value }} of {{ q.poolSize.value }} selected</span>
+          </div>
+          <div class="seg">
+            <button
               v-for="n in q.sizeOptions.value"
               :key="n"
-              class="chip"
-              :class="{ on: q.size.value === n }"
+              type="button"
+              class="seg-btn"
+              :class="{ on: q.roundSize.value === n }"
+              :aria-pressed="q.roundSize.value === n"
+              @click="q.size.value = n"
             >
-              <input
-                class="sr"
-                type="radio"
-                name="size"
-                :checked="q.size.value === n"
-                @change="q.size.value = n"
-              />
-              {{ n || 'All' }}
-            </label>
+              <span class="seg-main">{{ n }}</span>
+            </button>
           </div>
         </div>
 
         <CategoryList :blocks="q.levelBlocks.value" v-model:selected="q.selected.value" />
 
-        <div class="startbar">
-          <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
-            Start · {{ q.roundSize.value }} kanji
-          </button>
-        </div>
+        <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
+          Start · {{ q.roundSize.value }} kanji
+        </button>
       </section>
 
       <!-- Answer questions -->
@@ -243,25 +234,16 @@ function finish() {
 </template>
 
 <style scoped>
+.shell {
+  width: 100%;
+}
 .app {
-  max-width: 90%;
+  max-width: 30rem;
   margin: 0 auto;
   padding: 1.5rem 1rem 3rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-}
-/* Keep the Start button pinned to the bottom of the screen while the
-   category list scrolls, so it's never scrolled out of reach. */
-.startbar {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  flex-direction: column;
-  margin: 0 -1rem; /* span to the padded edges of .app */
-  padding: 0.75rem 1rem;
-  background: var(--color-background);
-  border-top: 1px solid var(--color-border);
 }
 .top {
   display: flex;
@@ -278,8 +260,10 @@ function finish() {
   padding: 0.25rem 0.5rem;
 }
 .brand {
-  margin-left: auto; /* push the logo to the right edge */
+  flex: 1;
   display: flex;
+  justify-content: center;
+  margin-right: 2.5rem; /* balance the hamburger so the logo stays centered */
   border: none;
   background: transparent;
   padding: 0;
@@ -328,13 +312,10 @@ function finish() {
 
 /* Desktop: a standing sidebar replaces the header and the drawer. */
 @media (min-width: 48rem) {
-  /* The sidebar + content form one bounded slab, centred on the page, so wide
-     screens get balanced margins instead of a lone column floating far right. */
+  /* Sidebar hugs the left edge; the content centres in whatever is left. */
   .shell {
     display: grid;
     grid-template-columns: 13rem minmax(0, 1fr);
-    max-width: 72rem;
-    margin: 0 auto;
   }
   .side {
     display: flex;
@@ -351,9 +332,9 @@ function finish() {
     display: none; /* logo and nav live in the sidebar */
   }
   .app {
-    max-width: none; /* fill the content column of the bounded slab */
-    margin: 0;
+    max-width: 34rem;
     padding: 1.5rem 1.5rem 3rem;
+    width: 100%;
   }
 }
 .pick {
@@ -361,12 +342,10 @@ function finish() {
   flex-direction: column;
   gap: 1.25rem;
 }
-/* Difficulty and round-size sit as flat labelled fields — same language as the
-   category list and settings, rather than a boxed-off card. */
-.field {
+.card {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.75rem;
 }
 .tag {
   font-size: 0.8rem;
@@ -374,61 +353,52 @@ function finish() {
   letter-spacing: 0.05em;
   color: var(--color-text);
 }
-.chips {
+.head {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
-.chip {
-  display: inline-flex;
+.sub {
+  font-size: 0.75rem;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+/* Segmented control: one strip, one cell per option. */
+.seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border: 2px solid var(--color-border);
+  border-radius: 0.8rem;
+  overflow: hidden;
+  background: var(--color-background);
+}
+.seg-btn {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-width: 2.75rem;
-  padding: 0.5rem 0.9rem;
-  border: 1.5px solid var(--color-border);
-  border-radius: 0.7rem;
-  background: var(--color-background-soft);
+  gap: 0.05rem;
+  padding: 0.5rem 0.25rem;
+  border: none;
+  border-left: 1px solid var(--color-border);
+  background: transparent;
   color: var(--color-text);
   font-size: 0.95rem;
-  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
   cursor: pointer;
-  transition:
-    border-color 0.15s ease,
-    color 0.15s ease,
-    background-color 0.15s ease;
+  transition: background 0.15s, color 0.15s;
 }
-.chip:hover {
-  border-color: var(--color-border-hover);
+.seg-btn:first-child {
+  border-left: none;
 }
-/* Selected: tinted by the level accent (or brand for round-size). */
-.chip.on {
-  border-color: var(--lv, var(--brand));
-  color: var(--lv, var(--brand));
-  background: var(--color-background-soft);
-  background: color-mix(in srgb, var(--lv, var(--brand)) 10%, var(--color-background-soft));
+.seg-btn:hover:not(:disabled):not(.on) {
+  background: var(--color-background-mute);
+}
+.seg-btn.on {
+  background: var(--lv, var(--brand));
+  color: #fff;
   font-weight: 600;
-}
-/* Focus lands on the hidden native input; surface a ring on the chip. */
-.chip:has(input:focus-visible) {
-  outline: 2px solid var(--lv, var(--brand));
-  outline-offset: 2px;
-}
-/* The last level on cannot be turned off — the pool would be empty. */
-.chip:has(input:disabled) {
-  cursor: default;
-  opacity: 0.5;
-}
-/* Native checkbox/radio drives state + accessibility; the chip is the visual. */
-.sr {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
 }
 .lead {
   text-align: center;
