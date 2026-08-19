@@ -1,0 +1,32 @@
+[
+  {
+    "id": "n5-nature",
+    "name": "Nature",
+    "kanji": [
+      { "char": "日", "meaning": "sun / day", "kana": "にち" },
+      { "char": "月", "meaning": "moon / month", "kana": "つき" },
+      { "char": "火", "meaning": "fire", "kana": "ひ" },
+      { "char": "水", "meaning": "water", "kana": "みず" },
+      { "char": "木", "meaning": "tree", "kana": "き" },
+      { "char": "金", "meaning": "gold", "kana": "きん" },
+      { "char": "土", "meaning": "earth", "kana": "つち" },
+      { "char": "山", "meaning": "mountain", "kana": "やま" },
+      { "char": "川", "meaning": "river", "kana": "かわ" }
+    ]
+  },
+  {
+    "id": "n5-people",
+    "name": "People",
+    "kanji": [
+      { "char": "人", "meaning": "person", "kana": "ひと" },
+      { "char": "子", "meaning": "child", "kana": "こ" },
+      { "char": "女", "meaning": "woman", "kana": "おんな" },
+      { "char": "男", "meaning": "man", "kana": "おとこ" },
+      { "char": "目", "meaning": "eye", "kana": "め" },
+      { "char": "口", "meaning": "mouth", "kana": "くち" },
+      { "char": "手", "meaning": "hand", "kana": "て" },
+      { "char": "足", "meaning": "foot / leg", "kana": "あし" },
+      { "char": "心", "meaning": "heart", "kana": "こころ" }
+    ]
+  }
+]
