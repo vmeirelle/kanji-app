@@ -8,6 +8,7 @@ const props = defineProps<{
   question: Question
   chosenKey: string | null
   disabled?: boolean
+  countdown?: number | null
 }>()
 const emit = defineEmits<{ answer: [key: string] }>()
 
@@ -34,6 +35,13 @@ const items = computed<GridItem[]>(() =>
     <div class="stage">
       <div class="card" :class="{ flipped: chosenKey }">
         <div class="face front">
+          <span
+            v-if="countdown != null && !chosenKey"
+            class="timer"
+            :class="{ low: countdown <= 3 }"
+          >
+            {{ countdown }}s
+          </span>
           <div class="glyph">{{ prompt }}</div>
         </div>
         <div class="face back" :class="verdict">
@@ -106,6 +114,23 @@ const items = computed<GridItem[]>(() =>
 }
 .back.no .glyph,
 .back.no dd {
+  color: #dc2626;
+}
+.timer {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.75rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  background: var(--color-background-mute);
+  color: var(--color-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+.timer.low {
+  background: #dc26261f;
   color: #dc2626;
 }
 .glyph {

@@ -1,46 +1,33 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { today, addDays, points, type Ranking } from '../rankings'
+import { levelColor } from '../data/blocks'
+import EmptyState from '../components/base/EmptyState.vue'
 
-const props = defineProps<{ rankings: Ranking[] }>()
+const props = defineProps<{ rankings: Ranking[]; levels: string[] }>()
 
-type BlockGroup = { blockId: string; blockName: string; entries: Ranking[] }
+type LevelGroup = { level: string; entries: Ranking[] }
 
 const day = ref(today())
-const category = ref('')
-const quantity = ref('')
+const level = ref('')
+const isToday = computed(() => day.value === today())
 const dayOf = (r: Ranking) => r.day ?? r.date.slice(0, 10)
 
-const categories = computed(() =>
-  [...new Set(props.rankings.map((r) => r.blockName))].sort((a, b) => a.localeCompare(b)),
-)
-const quantities = computed(() =>
-  [...new Set(props.rankings.map((r) => r.total))].sort((a, b) => a - b),
-)
-
-const blocks = computed<BlockGroup[]>(() => {
-  const map = new Map<string, BlockGroup>()
+const groups = computed<LevelGroup[]>(() => {
+  const map = new Map<string, LevelGroup>()
   for (const r of props.rankings) {
     if (dayOf(r) !== day.value) continue
-    if (category.value && r.blockName !== category.value) continue
-    if (quantity.value && String(r.total) !== quantity.value) continue
-    let g = map.get(r.blockId)
+    if (level.value && r.level !== level.value) continue
+    let g = map.get(r.level)
     if (!g) {
-      g = { blockId: r.blockId, blockName: r.blockName, entries: [] }
-      map.set(r.blockId, g)
+      g = { level: r.level, entries: [] }
+      map.set(r.level, g)
     }
     g.entries.push(r)
   }
   for (const g of map.values()) g.entries.sort((a, b) => points(b) - points(a))
-  return [...map.values()].sort((a, b) => a.blockName.localeCompare(b.blockName))
+  return [...map.values()].sort((a, b) => a.level.localeCompare(b.level))
 })
-
-const qtyLabel = (g: BlockGroup) => {
-  const totals = [...new Set(g.entries.map((e) => e.total))].sort((a, b) => a - b)
-  const lo = totals[0]
-  const hi = totals[totals.length - 1]
-  return lo === hi ? `${lo} kanji` : `${lo}–${hi} kanji`
-}
 
 const canNewer = computed(() => day.value < today())
 const older = () => (day.value = addDays(day.value, -1))
@@ -70,30 +57,31 @@ const onEnd = (e: TouchEvent) => {
       <button class="chev" :disabled="!canNewer" aria-label="Next day" @click="newer">›</button>
     </div>
 
-    <label class="filter">
-      <span>Category</span>
-      <select v-model="category" class="sel">
-        <option value="">All categories</option>
-        <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
-      </select>
-    </label>
+    <div class="seg">
+      <button type="button" class="seg-btn" :class="{ on: level === '' }" @click="level = ''">
+        All
+      </button>
+      <button
+        v-for="l in props.levels"
+        :key="l"
+        type="button"
+        class="seg-btn"
+        :class="{ on: level === l }"
+        :style="{ '--lv': levelColor(l) }"
+        @click="level = l"
+      >
+        {{ l }}
+      </button>
+    </div>
 
-    <label class="filter">
-      <span>Quantity</span>
-      <select v-model="quantity" class="sel">
-        <option value="">Any quantity</option>
-        <option v-for="n in quantities" :key="n" :value="String(n)">{{ n }} kanji</option>
-      </select>
-    </label>
+    <EmptyState v-if="!groups.length" src="/lost.png">
+      No scores on this day.<template v-if="isToday"> Play a ranked round to put a name up here.</template>
+    </EmptyState>
 
-    <p v-if="!blocks.length" class="empty">No scores on this day.</p>
-
-    <div v-for="block in blocks" :key="block.blockId" class="block">
-      <h2 class="block-name">
-        {{ block.blockName }} <span class="qty">· {{ qtyLabel(block) }}</span>
-      </h2>
+    <div v-for="g in groups" :key="g.level" class="block" :style="{ '--lv': levelColor(g.level) }">
+      <h2 class="block-name"><span class="lv">{{ g.level }}</span></h2>
       <ol class="list">
-        <li v-for="(r, i) in block.entries" :key="i" class="row">
+        <li v-for="(r, i) in g.entries" :key="i" class="row">
           <span class="pos">{{ i + 1 }}</span>
           <span class="name">{{ r.name }}</span>
           <span class="xy">{{ r.correct }}/{{ r.total }}</span>
@@ -135,47 +123,48 @@ const onEnd = (e: TouchEvent) => {
   font-weight: 600;
   color: var(--color-heading);
 }
-.filter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-  font-size: 0.85rem;
-  color: var(--color-text);
-}
-.sel {
-  flex: 1;
-  max-width: 16rem;
-  padding: 0.5rem 0.6rem;
+.seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   border: 2px solid var(--color-border);
-  border-radius: 0.6rem;
-  background: var(--color-background-soft);
-  color: var(--color-heading);
-  font-size: 0.9rem;
-  cursor: pointer;
+  border-radius: 0.8rem;
+  overflow: hidden;
+  background: var(--color-background);
+  margin-bottom: 1.25rem;
 }
-.sel:focus {
-  outline: none;
-  border-color: var(--brand);
-}
-.empty {
-  text-align: center;
+.seg-btn {
+  padding: 0.5rem 0.25rem;
+  border: none;
+  border-left: 1px solid var(--color-border);
+  background: transparent;
   color: var(--color-text);
-  padding: 2rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.seg-btn:first-child {
+  border-left: none;
+}
+.seg-btn:hover:not(.on) {
+  background: var(--color-background-mute);
+}
+.seg-btn.on {
+  background: var(--lv, var(--brand));
+  color: #fff;
 }
 .block {
   margin-bottom: 1.5rem;
 }
 .block-name {
   font-size: 1.05rem;
-  color: var(--color-heading);
   margin-bottom: 0.5rem;
 }
-.qty {
-  font-size: 0.85rem;
-  font-weight: 400;
-  color: var(--color-text);
+.lv {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--lv, var(--color-heading));
 }
 .list {
   list-style: none;
@@ -213,5 +202,4 @@ const onEnd = (e: TouchEvent) => {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-
 </style>

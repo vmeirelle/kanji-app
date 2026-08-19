@@ -7,6 +7,7 @@ import BaseIcon from '../components/base/BaseIcon.vue'
 import BaseCard from '../components/base/BaseCard.vue'
 import BaseStack from '../components/base/BaseStack.vue'
 import BaseProgress from '../components/base/BaseProgress.vue'
+import EmptyState from '../components/base/EmptyState.vue'
 
 defineProps<{ lessons: SavedLesson[] }>()
 const emit = defineEmits<{ resume: [id: string]; drop: [id: string] }>()
@@ -16,9 +17,9 @@ const when = (iso: string) => new Date(iso).toLocaleString()
 </script>
 
 <template>
-  <BaseText v-if="!lessons.length" :align="Align.Center" :color="Color.Text">
+  <EmptyState v-if="!lessons.length" src="/peace.png">
     Nothing paused. Stop a round mid-way and it waits for you here.
-  </BaseText>
+  </EmptyState>
 
   <BaseStack v-else :gap="Space.Sm">
     <BaseCard v-for="l in lessons" :key="l.id">

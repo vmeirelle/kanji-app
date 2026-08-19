@@ -2,13 +2,14 @@
 import { computed, onMounted, ref } from 'vue'
 import { useQuiz } from './composables/useQuiz'
 import { useBreakpoint } from './composables/useBreakpoint'
-import { loadRankings, addRanking, today, pointsOf, type Ranking } from './rankings'
+import { loadRankings, addRanking, today, type Ranking } from './rankings'
 import { levelColor } from './data/blocks'
 import { FORMATS } from './quiz'
 import CategoryList from './views/CategoryList.vue'
 import QuizView from './views/QuizView.vue'
 import RankingView from './views/RankingView.vue'
 import SavedView from './views/SavedView.vue'
+import NotFound from './views/NotFound.vue'
 import NavDrawer, { type NavItem } from './components/base/NavDrawer.vue'
 
 const NAV: NavItem[] = [
@@ -34,6 +35,14 @@ const progress = computed(() =>
   q.passTotal.value ? (q.position.value / q.passTotal.value) * 100 : 0,
 )
 
+const resultSticker = computed(() => {
+  const p = q.pct.value
+  if (p >= 90) return '/eureka.png'
+  if (p >= 70) return '/happy.png'
+  if (p >= 40) return '/confused.png'
+  return '/dead.png'
+})
+
 function go(id: string) {
   view.value = id
   menuOpen.value = false
@@ -51,13 +60,13 @@ function resumeLesson(id: string) {
 }
 
 function saveScore() {
-  if (!name.value.trim() || saved.value || !q.selected.value.length) return
+  if (!name.value.trim() || saved.value || q.mode.value !== 'ranked') return
   rankings.value = addRanking({
     name: name.value.trim(),
-    blockId: q.selectionId.value,
-    blockName: q.selectionName.value,
+    level: q.level.value,
     correct: q.firstCorrect.value,
     total: q.firstTotal.value,
+    points: q.rankedScore.value,
     day: today(),
     date: new Date().toISOString(),
   })
@@ -114,6 +123,28 @@ function finish() {
       
       <section v-if="q.phase.value === 'ready'" class="pick">
         <div class="card">
+          <span class="tag">Game</span>
+          <div class="seg">
+            <button
+              type="button"
+              class="seg-btn"
+              :class="{ on: q.mode.value === 'custom' }"
+              :aria-pressed="q.mode.value === 'custom'"
+              @click="q.setMode('custom')"
+            >
+              <span class="seg-main">Custom</span>
+            </button>
+            <button
+              type="button"
+              class="seg-btn"
+              :class="{ on: q.mode.value === 'ranked' }"
+              :aria-pressed="q.mode.value === 'ranked'"
+              @click="q.setMode('ranked')"
+            >
+              <span class="seg-main">Ranked</span>
+            </button>
+          </div>
+
           <span class="tag">Japanese level</span>
           <div class="seg">
             <button
@@ -141,7 +172,7 @@ function finish() {
               type="button"
               class="seg-btn"
               :class="{ on: q.activeSize.value === n }"
-              :disabled="q.sizeLocked(n)"
+              :disabled="q.sizeLocked(n) || q.mode.value === 'ranked'"
               :aria-pressed="q.activeSize.value === n"
               :title="q.sizeLocked(n) ? `Only ${q.poolSize.value} kanji at this level` : undefined"
               @click="q.size.value = n"
@@ -160,6 +191,7 @@ function finish() {
                   type="button"
                   class="seg-btn"
                   :class="{ on: q.from.value === f.id }"
+                  :disabled="q.mode.value === 'ranked'"
                   :aria-pressed="q.from.value === f.id"
                   @click="q.from.value = f.id"
                 >
@@ -176,6 +208,7 @@ function finish() {
                   type="button"
                   class="seg-btn"
                   :class="{ on: q.to.value === f.id }"
+                  :disabled="q.mode.value === 'ranked'"
                   :aria-pressed="q.to.value === f.id"
                   @click="q.to.value = f.id"
                 >
@@ -186,10 +219,14 @@ function finish() {
           </div>
         </div>
 
-        <CategoryList :blocks="q.levelBlocks.value" v-model:selected="q.selected.value" />
+        <CategoryList
+          :blocks="q.levelBlocks.value"
+          v-model:selected="q.selected.value"
+          :disabled="q.mode.value === 'ranked'"
+        />
 
         <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
-          Start · {{ q.roundSize.value }} kanji
+          {{ q.mode.value === 'ranked' ? `Start ranked · ${q.roundSize.value} words` : `Start · ${q.roundSize.value} kanji` }}
         </button>
       </section>
 
@@ -199,6 +236,7 @@ function finish() {
           <button class="stop" @click="finish">✕ Stop</button>
           <span>{{ q.position.value }}/{{ q.passTotal.value }}</span>
           <span class="tally">
+            <span v-if="q.mode.value === 'ranked'" class="pts">★ {{ q.rankedScore.value }}</span>
             <span class="ok">✓ {{ q.correct.value }}</span>
             <span class="no">✗ {{ q.wrong.value }}</span>
           </span>
@@ -209,6 +247,7 @@ function finish() {
           :question="q.question.value"
           :chosen-key="q.chosenKey.value"
           :disabled="q.answered.value"
+          :countdown="q.mode.value === 'ranked' ? q.secondsLeft.value : null"
           @answer="q.answer"
         />
         
@@ -220,31 +259,34 @@ function finish() {
       
       <div v-else class="overlay">
         <div class="modal">
+          <img class="modal-sticker" :src="resultSticker" alt="" />
           <p class="lead">Round complete 🎉</p>
-          <p class="score">{{ pointsOf(q.firstCorrect.value, q.firstTotal.value) }} pts</p>
+          <p v-if="q.mode.value === 'ranked'" class="score">{{ q.rankedScore.value }} pts</p>
           <p class="hint">
             {{ q.firstCorrect.value }}/{{ q.firstTotal.value }} correct · {{ q.pct.value }}%
           </p>
-          <p class="hint">First try on {{ q.selectionName.value }}</p>
+          <p class="hint">{{ q.level.value }} · {{ q.mode.value === 'ranked' ? 'Ranked' : 'Custom' }}</p>
 
           <button v-if="q.canRetry.value" class="btn" @click="q.retryIncorrect">
             Retry incorrect ({{ q.incorrectCount.value }})
           </button>
 
-          <template v-if="!saved">
-            <input
-              v-model="name"
-              class="input"
-              type="text"
-              placeholder="Your name"
-              maxlength="20"
-              @keyup.enter="saveScore"
-            />
-            <button class="btn primary" :disabled="!name.trim()" @click="saveScore">
-              Save to ranking
-            </button>
+          <template v-if="q.mode.value === 'ranked'">
+            <template v-if="!saved">
+              <input
+                v-model="name"
+                class="input"
+                type="text"
+                placeholder="Your name"
+                maxlength="20"
+                @keyup.enter="saveScore"
+              />
+              <button class="btn primary" :disabled="!name.trim()" @click="saveScore">
+                Save to ranking
+              </button>
+            </template>
+            <p v-else class="saved">Saved ✓</p>
           </template>
-          <p v-else class="saved">Saved ✓</p>
 
           <button class="btn" @click="finish">Finish</button>
         </div>
@@ -260,7 +302,9 @@ function finish() {
     />
 
     
-    <RankingView v-else :rankings="rankings" />
+    <RankingView v-else-if="view === 'ranking'" :rankings="rankings" :levels="q.levels.value" />
+
+    <NotFound v-else />
     </main>
   </div>
 </template>
@@ -451,6 +495,10 @@ function finish() {
   opacity: 0.3;
   cursor: not-allowed;
 }
+.seg-btn.on:disabled {
+  opacity: 1;
+  cursor: default;
+}
 .lead {
   text-align: center;
   font-size: 1.25rem;
@@ -466,6 +514,11 @@ function finish() {
 .tally {
   display: flex;
   gap: 0.75rem;
+}
+.tally .pts {
+  color: var(--brand);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 .stop {
   border: none;
@@ -531,6 +584,10 @@ function finish() {
   flex-direction: column;
   gap: 0.75rem;
   text-align: center;
+}
+.modal-sticker {
+  width: 7rem;
+  align-self: center;
 }
 .score {
   font-size: 2.75rem;

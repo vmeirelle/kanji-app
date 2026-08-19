@@ -5,18 +5,23 @@ import * as storage from '../storage'
 import { dropSaved, loadSaved, putSaved, type Round, type SavedLesson } from '../saved'
 
 type Phase = 'ready' | 'question' | 'done'
+type Mode = 'custom' | 'ranked'
 
-type Persisted = Round & { from: Format; to: Format }
+type Persisted = Round & { from: Format; to: Format; mode: Mode }
 
 const KEY = 'kanji-quiz-state.v7'
 const SIZES = [5, 10, 20, 50, 100]
 const DEFAULT_SIZE = 20
-const REVEAL_MS = 600
-const CLEAR_MS = 220
+const RANKED_SIZE = 20
+const TIMER_MS = 10000
+const TICK_MS = 100
+// Sentinel chosenKey used when the per-word timer runs out with no answer.
+const TIMEOUT_KEY = '__timeout__'
 
 export function useQuiz() {
   const blocks = ref<Block[]>([])
   const phase = ref<Phase>('ready')
+  const mode = ref<Mode>('custom')
   const chosenLevels = ref<string[]>([])
   const selected = ref<string[]>([])
   const size = ref(DEFAULT_SIZE)
@@ -33,6 +38,12 @@ export function useQuiz() {
   const scored = ref(false)
   const hasRetried = ref(false)
 
+  // Ranked-only: accumulated seconds-left across the pass, and the live countdown.
+  const rankedScore = ref(0)
+  const remaining = ref(0)
+  const secondsLeft = computed(() => Math.ceil(remaining.value / 1000))
+  let ticker: ReturnType<typeof setInterval> | undefined
+
   const from = ref<Format>('char')
   const to = ref<Format>('meaning')
 
@@ -47,11 +58,21 @@ export function useQuiz() {
   
   const level = computed(() => chosenLevels.value[0] ?? '')
 
-  
+
   function setLevel(l: string) {
     if (chosenLevels.value[0] === l) return
     chosenLevels.value = [l]
     selected.value = blocksIn(blocks.value, [l]).map((b) => b.id)
+  }
+
+  // Ranked locks the config: 20 words, Kanji -> Kana, every category in the level.
+  function setMode(m: Mode) {
+    mode.value = m
+    if (m === 'ranked') {
+      from.value = 'char'
+      to.value = 'kana'
+      selected.value = levelBlocks.value.map((b) => b.id)
+    }
   }
 
   const pool = computed(() => poolOf(blocks.value, selected.value))
@@ -71,7 +92,9 @@ export function useQuiz() {
     (size.value || DEFAULT_SIZE) <= poolSize.value ? size.value || DEFAULT_SIZE : maxSize.value,
   )
   
-  const roundSize = computed(() => Math.min(activeSize.value, poolSize.value))
+  const roundSize = computed(() =>
+    Math.min(mode.value === 'ranked' ? RANKED_SIZE : activeSize.value, poolSize.value),
+  )
   const byChar = (c: string) => pool.value.find((k) => k.char === c) ?? null
   const chosenBlocks = computed(() => blocks.value.filter((b) => selected.value.includes(b.id)))
   
@@ -88,7 +111,9 @@ export function useQuiz() {
     firstTotal.value ? Math.round((firstCorrect.value / firstTotal.value) * 100) : 0,
   )
 
-  const canRetry = computed(() => incorrectCount.value > 0 && !hasRetried.value)
+  const canRetry = computed(
+    () => mode.value === 'custom' && incorrectCount.value > 0 && !hasRetried.value,
+  )
 
   
   const roundOf = (): Round => ({
@@ -122,12 +147,35 @@ export function useQuiz() {
     hasRetried.value = r.hasRetried ?? false
   }
 
-  
+  function stopTimer() {
+    if (ticker) {
+      clearInterval(ticker)
+      ticker = undefined
+    }
+  }
+
+  // Wall-clock based: `remaining` is derived from a fixed deadline, so a
+  // throttled/coalesced interval (e.g. background tabs) can't drift the score.
+  function startTimer() {
+    stopTimer()
+    const deadline = Date.now() + TIMER_MS
+    remaining.value = TIMER_MS
+    ticker = setInterval(() => {
+      remaining.value = Math.max(0, deadline - Date.now())
+      if (remaining.value <= 0) {
+        stopTimer()
+        timeout()
+      }
+    }, TICK_MS)
+  }
+
+
   function newQuestion() {
     const target = queue.value[0] ? byChar(queue.value[0]) : null
     if (!target) return
     question.value = buildQuestion(target, pool.value, modeOf(from.value, to.value))
     chosenKey.value = null
+    if (mode.value === 'ranked') startTimer()
   }
 
   async function start() {
@@ -149,6 +197,13 @@ export function useQuiz() {
     }
     from.value = saved.from ?? 'char'
     to.value = saved.to ?? 'meaning'
+    mode.value = saved.mode ?? 'custom'
+
+    // Ranked runs aren't resumable (timer/score integrity); always start fresh.
+    if (mode.value === 'ranked') {
+      setMode('ranked')
+      return
+    }
 
     const q = (saved.queue ?? []).filter((c) => pool.value.some((k) => k.char === c))
     if (!q.length || q.length !== saved.queue?.length) return
@@ -188,22 +243,35 @@ export function useQuiz() {
     firstTotal.value = 0
     scored.value = false
     hasRetried.value = false
+    rankedScore.value = 0
     newQuestion()
     phase.value = 'question'
   }
 
   function answer(key: string) {
     if (answered.value || !question.value) return
+    stopTimer()
     chosenKey.value = key
     const picked = question.value.options.find((o) => o.key === key)
     const char = queue.value[0]
     if (picked?.correct) {
       correct.value++
+      if (mode.value === 'ranked') {
+        rankedScore.value += Math.max(0, Math.floor(remaining.value / 1000))
+      }
     } else {
       wrong.value++
       if (char && !incorrect.value.includes(char)) incorrect.value.push(char)
     }
+  }
 
+  // Timer expired with no pick: count it wrong (0 pts) and flip the card red.
+  function timeout() {
+    if (answered.value || !question.value) return
+    chosenKey.value = TIMEOUT_KEY
+    wrong.value++
+    const char = queue.value[0]
+    if (char && !incorrect.value.includes(char)) incorrect.value.push(char)
   }
 
   
@@ -217,6 +285,7 @@ export function useQuiz() {
       newQuestion()
     } else {
 
+      stopTimer()
       if (!scored.value) {
         firstCorrect.value = correct.value
         firstTotal.value = passTotal.value
@@ -242,7 +311,9 @@ export function useQuiz() {
 
   
   function restart() {
-    if (queue.value.length) {
+    stopTimer()
+    // Only custom rounds can be paused/resumed; ranked runs are discarded.
+    if (queue.value.length && mode.value === 'custom') {
       savedLessons.value = putSaved(savedLessons.value, {
         ...roundOf(),
         id: roundId.value || String(Date.now()),
@@ -250,6 +321,7 @@ export function useQuiz() {
         date: new Date().toISOString(),
       })
     }
+    rankedScore.value = 0
     queue.value = []
     passTotal.value = 0
     incorrect.value = []
@@ -269,9 +341,9 @@ export function useQuiz() {
   })
 
   watch(
-    [chosenLevels, selected, size, queue, passTotal, incorrect, correct, wrong, from, to, scored, hasRetried],
+    [mode, chosenLevels, selected, size, queue, passTotal, incorrect, correct, wrong, from, to, scored, hasRetried],
     () => {
-      storage.save<Persisted>(KEY, { ...roundOf(), from: from.value, to: to.value })
+      storage.save<Persisted>(KEY, { ...roundOf(), from: from.value, to: to.value, mode: mode.value })
     },
     { deep: true },
   )
@@ -279,6 +351,11 @@ export function useQuiz() {
   return {
     blocks,
     phase,
+    mode,
+    setMode,
+    rankedScore,
+    remaining,
+    secondsLeft,
     levels,
     chosenLevels,
     level,

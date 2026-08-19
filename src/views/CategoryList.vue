@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { blocksIn, levelColor, levelsOf, type Block } from '../data/blocks'
 
-const props = defineProps<{ blocks: Block[]; selected: string[] }>()
+const props = defineProps<{ blocks: Block[]; selected: string[]; disabled?: boolean }>()
 const emit = defineEmits<{ 'update:selected': [string[]] }>()
 
 const groups = computed(() =>
@@ -12,6 +12,7 @@ const has = (id: string) => props.selected.includes(id)
 const countOn = (blocks: Block[]) => blocks.filter((b) => has(b.id)).length
 
 function toggle(id: string) {
+  if (props.disabled) return
   emit(
     'update:selected',
     has(id) ? props.selected.filter((x) => x !== id) : [...props.selected, id],
@@ -19,6 +20,7 @@ function toggle(id: string) {
 }
 
 function toggleGroup(blocks: Block[]) {
+  if (props.disabled) return
   const ids = blocks.map((b) => b.id)
   emit(
     'update:selected',
@@ -30,7 +32,7 @@ function toggleGroup(blocks: Block[]) {
 </script>
 
 <template>
-  <div class="groups">
+  <div class="groups" :class="{ locked: disabled }">
     <section
       v-for="g in groups"
       :key="g.level"
@@ -40,7 +42,7 @@ function toggleGroup(blocks: Block[]) {
       <div class="head">
         <span class="lv">{{ g.level }}</span>
         <span class="count">{{ countOn(g.blocks) }}/{{ g.blocks.length }} categories</span>
-        <button class="all" @click="toggleGroup(g.blocks)">
+        <button v-if="!disabled" class="all" @click="toggleGroup(g.blocks)">
           {{ g.blocks.every((b) => has(b.id)) ? 'None' : 'All' }}
         </button>
       </div>
@@ -52,6 +54,7 @@ function toggleGroup(blocks: Block[]) {
           type="button"
           class="tile"
           :class="{ on: has(b.id) }"
+          :disabled="disabled"
           :aria-pressed="has(b.id)"
           @click="toggle(b.id)"
         >
@@ -116,6 +119,12 @@ function toggleGroup(blocks: Block[]) {
 }
 .tile:active {
   transform: scale(0.96);
+}
+.tile:disabled {
+  cursor: default;
+}
+.tile:disabled:active {
+  transform: none;
 }
 .name {
   font-size: 0.75rem;

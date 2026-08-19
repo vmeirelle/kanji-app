@@ -2,20 +2,17 @@ import * as storage from './storage'
 
 export type Ranking = {
   name: string
-  blockId: string
-  blockName: string
+  level: string
   correct: number
   total: number
+  points: number
   day: string
   date: string
 }
 
-const KEY = 'kanji-rankings.v2'
+const KEY = 'kanji-rankings.v3'
 
-export const pointsOf = (correct: number, total: number): number =>
-  total ? Math.round(((correct * correct) / total) * 10) : 0
-
-export const points = (r: Ranking): number => pointsOf(r.correct, r.total)
+export const points = (r: Ranking): number => r.points
 
 export const loadRankings = (): Ranking[] => storage.load<Ranking[]>(KEY) ?? []
 
