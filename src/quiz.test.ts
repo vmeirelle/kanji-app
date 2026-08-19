@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
+import { useQuiz } from './useQuiz'
 import { FORMATS, modeOf, buildQuestion } from './quiz'
 import blocks from './data/blocks.json'
-import { blocksAt, levelsOf, poolOf, type Block, type Kanji } from './data/blocks'
+import { blocksIn, levelsOf, poolOf, type Block, type Kanji } from './data/blocks'
 
 const pool: Kanji[] = Array.from({ length: 12 }, (_, i) => ({
   char: `c${i}`,
@@ -60,14 +61,18 @@ describe('category selection', () => {
     const levels = levelsOf(all)
     expect(levels[0]).toBe('N5')
     expect(new Set(levels).size).toBe(levels.length)
-    expect(levels.flatMap((l) => blocksAt(all, l))).toHaveLength(all.length)
+    expect(blocksIn(all, levels)).toHaveLength(all.length)
   })
 
-  it('offers only the chosen level\'s categories', () => {
-    const n5 = blocksAt(all, 'N5')
+  it('mixes categories across the checked levels only', () => {
+    const n5 = blocksIn(all, ['N5'])
     expect(n5.length).toBeGreaterThan(1)
     expect(n5.every((b) => b.level === 'N5')).toBe(true)
-    expect(blocksAt(all, 'N1')).toHaveLength(0)
+    // Two levels checked = both levels on offer, nothing else.
+    const mixed = blocksIn(all, ['N5', 'N4'])
+    expect(mixed.length).toBe(n5.length + blocksIn(all, ['N4']).length)
+    expect(blocksIn(all, [])).toHaveLength(0)
+    expect(blocksIn(all, ['N9'])).toHaveLength(0) // unknown level offers nothing
   })
 
   it('pools only the selected categories', () => {
@@ -84,5 +89,23 @@ describe('category selection', () => {
       const q = buildQuestion(pool[0]!, pool, modeOf('char', fmt.id), 9)
       expect(new Set(q.options.map((o) => o.label)).size).toBe(9)
     }
+  })
+})
+
+describe('useQuiz levels', () => {
+  it('keeps at least one level checked', async () => {
+    const q = useQuiz()
+    await q.start()
+    expect(q.chosenLevels.value).toEqual(['N5'])
+    q.toggleLevel('N5') // the only one on — refused
+    expect(q.chosenLevels.value).toEqual(['N5'])
+    expect(q.isOnlyLevel('N5')).toBe(true)
+    q.toggleLevel('N4') // mixing in a second level is fine
+    expect(q.chosenLevels.value).toEqual(['N5', 'N4'])
+    expect(q.isOnlyLevel('N5')).toBe(false)
+    q.toggleLevel('N5') // now N5 can go, N4 holds the floor
+    expect(q.chosenLevels.value).toEqual(['N4'])
+    expect(q.levelBlocks.value.every((b) => b.level === 'N4')).toBe(true)
+    expect(q.poolSize.value).toBeGreaterThan(0)
   })
 })

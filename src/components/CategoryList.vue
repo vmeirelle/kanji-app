@@ -29,7 +29,7 @@ function toggleAll() {
     </div>
     <label v-for="b in blocks" :key="b.id" class="row" :class="{ on: has(b.id) }">
       <input type="checkbox" :checked="has(b.id)" @change="toggle(b.id)" />
-      <span class="name">{{ b.name }}</span>
+      <span class="name"><span class="lv">{{ b.level }}</span>{{ b.name }}</span>
       <span class="count">{{ b.kanji.length }}</span>
     </label>
   </div>
@@ -69,6 +69,15 @@ function toggleAll() {
   color: var(--color-text);
   font-size: 1rem;
   cursor: pointer;
+}
+.lv {
+  display: inline-block;
+  min-width: 2rem;
+  margin-right: 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--color-text);
 }
 .row.on .name {
   color: var(--color-heading);

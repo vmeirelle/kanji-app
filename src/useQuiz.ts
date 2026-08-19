@@ -1,5 +1,5 @@
 import { ref, computed, watch } from 'vue'
-import { blocksAt, levelsOf, loadBlocks, poolOf, type Block } from './data/blocks'
+import { blocksIn, levelsOf, loadBlocks, poolOf, type Block } from './data/blocks'
 import { modeOf, buildQuestion, shuffle, type Format, type Question } from './quiz'
 import * as storage from './storage'
 
@@ -7,7 +7,7 @@ type Phase = 'ready' | 'question' | 'done'
 
 /** The minimal, JSON-serializable slice we persist to localStorage. */
 type Persisted = {
-  level: string
+  levels: string[]
   selected: string[]
   queue: string[]
   passTotal: number
@@ -22,14 +22,14 @@ type Persisted = {
   hasRetried: boolean
 }
 
-const KEY = 'kanji-quiz-state.v5'
+const KEY = 'kanji-quiz-state.v6'
 const REVEAL_MS = 600 // how long the correct/wrong colors stay lit
 const CLEAR_MS = 220 // neutral gap while the colors fade, before the next kanji
 
 export function useQuiz() {
   const blocks = ref<Block[]>([])
   const phase = ref<Phase>('ready')
-  const levelRef = ref('N5') // JLPT difficulty, set in Settings; persisted
+  const chosenLevels = ref<string[]>([]) // JLPT levels in play — mixable; persisted
   const selected = ref<string[]>([]) // category ids the user opted into; persisted
   const queue = ref<string[]>([]) // kanji chars left in this pass; [0] is current
   const passTotal = ref(0) // size of the current pass, for the x/total display
@@ -51,19 +51,26 @@ export function useQuiz() {
   const chosenKey = ref<string | null>(null) // the square the user tapped (null until answered)
   const answered = computed(() => chosenKey.value !== null)
 
-  const levels = computed(() => levelsOf(blocks.value))
-  /** The categories offered on the Learn tab — those of the chosen level. */
-  const levelBlocks = computed(() => blocksAt(blocks.value, levelRef.value))
-  /** Changing difficulty re-offers that level's categories and drops the round. */
-  const level = computed({
-    get: () => levelRef.value,
-    set: (l: string) => {
-      if (l === levelRef.value) return
-      levelRef.value = l
-      selected.value = levelBlocks.value.map((b) => b.id)
-      restart()
-    },
-  })
+  const levels = computed(() => levelsOf(blocks.value)) // every level in the data
+  /** The categories on offer: those of every checked level. */
+  const levelBlocks = computed(() => blocksIn(blocks.value, chosenLevels.value))
+
+  /** True for the one remaining checked level — its checkbox is locked on. */
+  const isOnlyLevel = (l: string) =>
+    chosenLevels.value.length === 1 && chosenLevels.value[0] === l
+
+  /** Check/uncheck a level, taking or dropping its categories with it. */
+  function toggleLevel(l: string) {
+    const on = chosenLevels.value.includes(l)
+    if (on && chosenLevels.value.length === 1) return // at least one level stays on
+    const ids = blocksIn(blocks.value, [l]).map((b) => b.id)
+    chosenLevels.value = on
+      ? chosenLevels.value.filter((x) => x !== l)
+      : [...chosenLevels.value, l]
+    selected.value = on
+      ? selected.value.filter((id) => !ids.includes(id))
+      : [...new Set([...selected.value, ...ids])]
+  }
 
   // Every selected category pooled together: the pass, and the distractors.
   const pool = computed(() => poolOf(blocks.value, selected.value))
@@ -72,9 +79,8 @@ export function useQuiz() {
   const chosenBlocks = computed(() => blocks.value.filter((b) => selected.value.includes(b.id)))
   /** Short label for the header and the ranking row. */
   const selectionName = computed(() => {
-    const names = chosenBlocks.value.map((b) => b.name)
-    const label = names.length > 2 ? `${names[0]} +${names.length - 1}` : names.join(' · ')
-    return `${levelRef.value} · ${label}`
+    const names = chosenBlocks.value.map((b) => `${b.level} ${b.name}`)
+    return names.length > 2 ? `${names[0]} +${names.length - 1}` : names.join(' · ')
   })
   const selectionId = computed(() => [...selected.value].sort().join('+'))
   // Question number within the current pass, e.g. 3 of 9.
@@ -99,7 +105,8 @@ export function useQuiz() {
     blocks.value = await loadBlocks()
     const saved = storage.load<Persisted>(KEY)
     // Level and categories are config: remembered across sessions, so no re-picking.
-    levelRef.value = saved?.level ?? levels.value[0] ?? 'N5'
+    chosenLevels.value = (saved?.levels ?? []).filter((l) => levels.value.includes(l))
+    if (!chosenLevels.value.length) chosenLevels.value = levels.value.slice(0, 1)
     selected.value = (saved?.selected ?? []).filter((id) =>
       levelBlocks.value.some((b) => b.id === id),
     )
@@ -212,10 +219,10 @@ export function useQuiz() {
 
   // Persist selection + pass progress whenever either changes.
   watch(
-    [levelRef, selected, queue, passTotal, incorrect, correct, wrong, from, to, scored, hasRetried],
+    [chosenLevels, selected, queue, passTotal, incorrect, correct, wrong, from, to, scored, hasRetried],
     () => {
       storage.save<Persisted>(KEY, {
-        level: levelRef.value,
+        levels: chosenLevels.value,
         selected: selected.value,
         queue: queue.value,
         passTotal: passTotal.value,
@@ -236,8 +243,10 @@ export function useQuiz() {
   return {
     blocks,
     phase,
-    level,
     levels,
+    chosenLevels,
+    toggleLevel,
+    isOnlyLevel,
     levelBlocks,
     selected,
     poolSize,

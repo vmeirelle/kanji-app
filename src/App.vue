@@ -85,13 +85,30 @@ function finish() {
 
     <!-- LEARN -->
     <template v-if="view === 'learn'">
-      <!-- Pick categories for the level set in Settings. Remembered between rounds. -->
+      <!-- Levels mix freely; categories follow whatever is checked. Both remembered. -->
       <section v-if="q.phase.value === 'ready'" class="pick">
-        <p class="level-note">
-          Level <strong>{{ q.level.value }}</strong> —
-          <button class="link" @click="go('settings')">change</button>
-        </p>
+        <div class="card">
+          <span class="tag">Difficulty</span>
+          <div class="chips">
+            <label
+              v-for="l in q.levels.value"
+              :key="l"
+              class="chip"
+              :class="{ on: q.chosenLevels.value.includes(l) }"
+            >
+              <input
+                type="checkbox"
+                :checked="q.chosenLevels.value.includes(l)"
+                :disabled="q.isOnlyLevel(l)"
+                @change="q.toggleLevel(l)"
+              />
+              {{ l }}
+            </label>
+          </div>
+        </div>
+
         <CategoryList :blocks="q.levelBlocks.value" v-model:selected="q.selected.value" />
+
         <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
           Start · {{ q.poolSize.value }} kanji
         </button>
@@ -159,13 +176,7 @@ function finish() {
     <RankingView v-else-if="view === 'ranking'" :rankings="rankings" />
 
     <!-- SETTINGS -->
-    <SettingsView
-      v-else
-      v-model:from="q.from.value"
-      v-model:to="q.to.value"
-      v-model:level="q.level.value"
-      :levels="q.levels.value"
-    />
+    <SettingsView v-else v-model:from="q.from.value" v-model:to="q.to.value" />
   </main>
 </template>
 
@@ -211,21 +222,54 @@ function finish() {
   flex-direction: column;
   gap: 1.25rem;
 }
-.level-note {
-  font-size: 0.85rem;
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-background-soft);
+}
+.tag {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: var(--color-text);
 }
-.level-note strong {
-  color: var(--color-heading);
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
-.link {
-  border: none;
-  background: transparent;
-  padding: 0;
-  font-size: 0.85rem;
-  color: var(--brand);
-  text-decoration: underline;
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.8rem;
+  border: 2px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-size: 0.95rem;
   cursor: pointer;
+}
+.chip.on {
+  border-color: var(--brand);
+  color: var(--color-heading);
+  font-weight: 600;
+}
+.chip input {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--brand);
+}
+/* The last level on cannot be turned off — the pool would be empty. */
+.chip input:disabled {
+  cursor: default;
+}
+.chip:has(input:disabled) {
+  cursor: default;
 }
 .lead {
   text-align: center;

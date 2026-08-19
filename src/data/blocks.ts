@@ -9,9 +9,9 @@ export const loadBlocks = async (): Promise<Block[]> => blocks as Block[]
 /** JLPT levels present in the data, easiest first (file order). */
 export const levelsOf = (blocks: Block[]): string[] => [...new Set(blocks.map((b) => b.level))]
 
-/** Categories belonging to one level. */
-export const blocksAt = (blocks: Block[], level: string): Block[] =>
-  blocks.filter((b) => b.level === level)
+/** Categories belonging to any of the given levels — levels mix freely. */
+export const blocksIn = (blocks: Block[], levels: string[]): Block[] =>
+  blocks.filter((b) => levels.includes(b.level))
 
 /** The kanji the user has opted into — the quiz pool and its distractors. */
 export const poolOf = (blocks: Block[], ids: string[]): Kanji[] =>
