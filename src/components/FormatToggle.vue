@@ -6,7 +6,7 @@ const emit = defineEmits<{ 'update:modelValue': [Format] }>()
 </script>
 
 <template>
-  <label class="toggle">
+  <label class="row">
     <span class="lbl">{{ label }}</span>
     <select
       class="sel"
@@ -19,25 +19,29 @@ const emit = defineEmits<{ 'update:modelValue': [Format] }>()
 </template>
 
 <style scoped>
-.toggle {
-  display: inline-flex;
+.row {
+  display: flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.8rem;
-  color: var(--color-text);
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 0.25rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.lbl {
+  color: var(--color-heading);
+  font-size: 1rem;
 }
 .sel {
-  padding: 0.15rem 0.3rem;
-  border: none;
-  border-bottom: 1px solid var(--color-border);
-  border-radius: 0;
-  background: transparent;
+  padding: 0.5rem 0.6rem;
+  border: 2px solid var(--color-border);
+  border-radius: 0.6rem;
+  background: var(--color-background-soft);
   color: var(--color-heading);
-  font-size: 0.8rem;
+  font-size: 1rem;
   cursor: pointer;
 }
 .sel:focus {
   outline: none;
-  border-bottom-color: #16a34a;
+  border-color: #16a34a;
 }
 </style>
