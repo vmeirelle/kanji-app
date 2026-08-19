@@ -111,9 +111,6 @@ const onEnd = (e: TouchEvent) => {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-hover) transparent;
 }
 .daynav {
   display: flex;

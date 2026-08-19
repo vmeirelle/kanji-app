@@ -67,9 +67,6 @@ const when = (iso: string) => new Date(iso).toLocaleString()
   min-height: 0;
   overflow-y: auto;
   padding-top: 1.25rem;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-hover) transparent;
 }
 .lesson {
   padding: 0.85rem;

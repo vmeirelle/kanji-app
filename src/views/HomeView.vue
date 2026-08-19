@@ -35,7 +35,7 @@ const days = Array.from({ length: 35 }, (_, i) => (i * 3 + 2) % 5)
 
 <template>
   <section class="home">
-    <PageHeader jp="ホーム" title="Home" image="/happy.png" />
+    <PageHeader jp="ホーム" title="Home" image="/eureka.png" />
 
     <div class="scroll">
       <div class="block">
@@ -85,7 +85,6 @@ const days = Array.from({ length: 35 }, (_, i) => (i * 3 + 2) % 5)
               <span class="ptitle">{{ p.title }}</span>
               <span class="psub">{{ p.sub }}</span>
             </div>
-            <!-- Placeholder chart — bars indicate where the graph will go. -->
             <div class="chart" aria-hidden="true">
               <span v-for="(h, i) in p.bars" :key="i" class="bar" :style="{ height: h + '%' }" />
             </div>
@@ -104,29 +103,13 @@ const days = Array.from({ length: 35 }, (_, i) => (i * 3 + 2) % 5)
   min-height: 0;
 }
 .scroll {
-  --page: var(--lv-N3);
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 1.5rem 1rem 0;
+  padding: 1.5rem 0.75rem 0.5rem;
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  scrollbar-gutter: stable both-edges;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--page) 25%, transparent) transparent;
-}
-.scroll::-webkit-scrollbar {
-  width: 1.2rem;
-}
-.scroll::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--page) 25%, transparent);
-  border-radius: 999px;
-  border: 0.45rem solid transparent;
-  background-clip: padding-box;
-}
-.scroll::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--page) 50%, transparent);
 }
 .block {
   display: flex;

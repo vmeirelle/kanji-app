@@ -136,36 +136,12 @@ const shownSelected = computed(() =>
   min-height: 0;
 }
 /* Only the category grid scrolls; header, config and the Start button stay put.
-   scrollbar-gutter keeps the gutter reserved so tiles never shift when the
-   scrollbar comes and goes. */
+   Native scrollbar (auto-hides / overlays), with padding so it clears the tiles. */
 .cats {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  scroll-behavior: smooth;
-  /* Equal padding both sides + both-edges gutter = symmetric tiles with room
-     between them and the scrollbar. */
-  padding: 0 0.5rem;
-  scrollbar-gutter: stable both-edges;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in srgb, var(--lv, var(--brand)) 40%, transparent) transparent;
-}
-.cats::-webkit-scrollbar {
-  width: 0.9rem;
-}
-.cats::-webkit-scrollbar-track {
-  background: transparent;
-}
-.cats::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--lv, var(--brand)) 40%, transparent);
-  border-radius: 999px;
-  /* wide transparent border = thin, floating pill with space around it */
-  border: 0.3rem solid transparent;
-  background-clip: padding-box;
-  transition: background 0.2s;
-}
-.cats::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--lv, var(--brand)) 70%, transparent);
+  padding: 0 0.6rem;
 }
 .card {
   display: flex;

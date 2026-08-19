@@ -52,9 +52,6 @@ const emit = defineEmits<{ practice: [] }>()
   display: flex;
   flex-direction: column;
   gap: 1.75rem;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-hover) transparent;
 }
 .hero {
   display: flex;

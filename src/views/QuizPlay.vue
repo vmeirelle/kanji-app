@@ -42,9 +42,6 @@ const progress = computed(() =>
 <style scoped>
 .play {
   overflow-y: auto;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-hover) transparent;
 }
 .bar {
   display: flex;

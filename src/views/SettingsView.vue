@@ -95,9 +95,6 @@ const onOff = [
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  scrollbar-gutter: stable;
-  scrollbar-width: thin;
-  scrollbar-color: var(--color-border-hover) transparent;
 }
 .group {
   display: flex;
