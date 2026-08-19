@@ -18,7 +18,7 @@ const TICK_MS = 100
 // Sentinel chosenKey used when the per-word timer runs out with no answer.
 const TIMEOUT_KEY = '__timeout__'
 
-export function useQuiz() {
+function createQuiz() {
   const blocks = ref<Block[]>([])
   const phase = ref<Phase>('ready')
   const mode = ref<Mode>('custom')
@@ -77,7 +77,6 @@ export function useQuiz() {
 
   const pool = computed(() => poolOf(blocks.value, selected.value))
   const poolSize = computed(() => pool.value.length)
-  const queueChars = computed(() => queue.value)
 
   const sizeOptions = computed(() => SIZES)
 
@@ -102,7 +101,6 @@ export function useQuiz() {
     const names = chosenBlocks.value.map((b) => `${b.level} ${b.name}`)
     return names.length > 2 ? `${names[0]} +${names.length - 1}` : names.join(' · ')
   })
-  const selectionId = computed(() => [...selected.value].sort().join('+'))
 
   const position = computed(() => passTotal.value - queue.value.length + 1)
   const incorrectCount = computed(() => incorrect.value.length)
@@ -357,7 +355,6 @@ export function useQuiz() {
     remaining,
     secondsLeft,
     levels,
-    chosenLevels,
     level,
     setLevel,
     levelBlocks,
@@ -367,13 +364,10 @@ export function useQuiz() {
     sizeOptions,
     sizeLocked,
     activeSize,
-    queueChars,
     roundSize,
     savedLessons,
     resume,
     drop,
-    selectionName,
-    selectionId,
     question,
     chosenKey,
     answered,
@@ -395,4 +389,12 @@ export function useQuiz() {
     retryIncorrect,
     restart,
   }
+}
+
+// Single shared quiz instance so every view (config, play, result) reads and
+// writes the same state without prop-drilling.
+let instance: ReturnType<typeof createQuiz> | null = null
+
+export function useQuiz() {
+  return (instance ??= createQuiz())
 }

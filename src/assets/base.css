@@ -43,6 +43,12 @@
   --lv-N2: #ea580c;
   --lv-N1: #dc2626;
 
+
+  --ok: #16a34a;
+  --ok-soft: #16a34a1f;
+  --danger: #dc2626;
+  --danger-soft: #dc26261f;
+
   --section-gap: 160px;
 }
 
@@ -65,6 +71,11 @@
 
     
     --brand: #6d97d6;
+
+    --ok: #22c55e;
+    --ok-soft: #22c55e26;
+    --danger: #f87171;
+    --danger-soft: #f8717126;
   }
 }
 

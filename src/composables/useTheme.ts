@@ -55,9 +55,9 @@ export enum Space {
 const colors: Record<Color, string> = {
   [Color.Brand]: 'var(--brand)',
   [Color.OnBrand]: '#ffffff',
-  [Color.Correct]: '#16a34a',
-  [Color.CorrectSoft]: 'rgba(22, 163, 74, 0.13)',
-  [Color.Wrong]: '#dc2626',
+  [Color.Correct]: 'var(--ok)',
+  [Color.CorrectSoft]: 'var(--ok-soft)',
+  [Color.Wrong]: 'var(--danger)',
   [Color.Heading]: 'var(--color-heading)',
   [Color.Text]: 'var(--color-text)',
   [Color.Background]: 'var(--color-background)',

@@ -101,20 +101,20 @@ const items = computed<GridItem[]>(() =>
   opacity: 1;
 }
 .back.ok {
-  border-color: #16a34a;
-  background: #16a34a1f;
+  border-color: var(--ok);
+  background: var(--ok-soft);
 }
 .back.ok .glyph,
 .back.ok dd {
-  color: #16a34a;
+  color: var(--ok);
 }
 .back.no {
-  border-color: #dc2626;
-  background: #dc26261f;
+  border-color: var(--danger);
+  background: var(--danger-soft);
 }
 .back.no .glyph,
 .back.no dd {
-  color: #dc2626;
+  color: var(--danger);
 }
 .timer {
   position: absolute;
@@ -130,8 +130,8 @@ const items = computed<GridItem[]>(() =>
   letter-spacing: 0.02em;
 }
 .timer.low {
-  background: #dc26261f;
-  color: #dc2626;
+  background: var(--danger-soft);
+  color: var(--danger);
 }
 .glyph {
   min-width: 0;
