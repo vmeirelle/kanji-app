@@ -116,41 +116,38 @@ function finish() {
       <!-- Levels mix freely; categories follow whatever is checked. Both remembered. -->
       <section v-if="q.phase.value === 'ready'" class="pick">
         <div class="card">
-          <span class="tag">Difficulty</span>
-          <div class="chips">
-            <label
+          <span class="tag">Japanese level</span>
+          <div class="seg">
+            <button
               v-for="l in q.levels.value"
               :key="l"
-              class="chip"
-              :class="{ on: q.chosenLevels.value.includes(l) }"
+              type="button"
+              class="seg-btn"
+              :class="{ on: q.level.value === l }"
               :style="{ '--lv': levelColor(l) }"
+              :aria-pressed="q.level.value === l"
+              @click="q.setLevel(l)"
             >
-              <input
-                type="checkbox"
-                :checked="q.chosenLevels.value.includes(l)"
-                :disabled="q.isOnlyLevel(l)"
-                @change="q.toggleLevel(l)"
-              />
-              {{ l }}
-            </label>
+              <span class="seg-main">{{ l }}</span>
+            </button>
           </div>
 
-          <span class="tag">Kanji per round</span>
-          <div class="chips">
-            <label
+          <div class="head">
+            <span class="tag">Kanji per round</span>
+            <span class="sub">{{ q.roundSize.value }} of {{ q.poolSize.value }} selected</span>
+          </div>
+          <div class="seg">
+            <button
               v-for="n in q.sizeOptions.value"
               :key="n"
-              class="chip"
-              :class="{ on: q.size.value === n }"
+              type="button"
+              class="seg-btn"
+              :class="{ on: q.roundSize.value === n }"
+              :aria-pressed="q.roundSize.value === n"
+              @click="q.size.value = n"
             >
-              <input
-                type="radio"
-                name="size"
-                :checked="q.size.value === n"
-                @change="q.size.value = n"
-              />
-              {{ n || 'All' }}
-            </label>
+              <span class="seg-main">{{ n }}</span>
+            </button>
           </div>
         </div>
 
@@ -337,6 +334,7 @@ function finish() {
   .app {
     max-width: 34rem;
     padding: 1.5rem 1.5rem 3rem;
+    width: 100%;
   }
 }
 .pick {
@@ -348,10 +346,6 @@ function finish() {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding: 1rem;
-  border: 2px solid var(--color-border);
-  border-radius: 1rem;
-  background: var(--color-background-soft);
 }
 .tag {
   font-size: 0.8rem;
@@ -359,39 +353,52 @@ function finish() {
   letter-spacing: 0.05em;
   color: var(--color-text);
 }
-.chips {
+.head {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.8rem;
+.sub {
+  font-size: 0.75rem;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+/* Segmented control: one strip, one cell per option. */
+.seg {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
   border: 2px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: 0.8rem;
+  overflow: hidden;
   background: var(--color-background);
+}
+.seg-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+  padding: 0.5rem 0.25rem;
+  border: none;
+  border-left: 1px solid var(--color-border);
+  background: transparent;
   color: var(--color-text);
   font-size: 0.95rem;
+  line-height: 1.2;
   cursor: pointer;
+  transition: background 0.15s, color 0.15s;
 }
-.chip.on {
-  border-color: var(--lv, var(--brand));
-  color: var(--lv, var(--color-heading));
+.seg-btn:first-child {
+  border-left: none;
+}
+.seg-btn:hover:not(:disabled):not(.on) {
+  background: var(--color-background-mute);
+}
+.seg-btn.on {
+  background: var(--lv, var(--brand));
+  color: #fff;
   font-weight: 600;
-}
-.chip input {
-  width: 1rem;
-  height: 1rem;
-  accent-color: var(--lv, var(--brand));
-}
-/* The last level on cannot be turned off — the pool would be empty. */
-.chip input:disabled {
-  cursor: default;
-}
-.chip:has(input:disabled) {
-  cursor: default;
 }
 .lead {
   text-align: center;

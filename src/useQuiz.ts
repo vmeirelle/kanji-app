@@ -10,16 +10,17 @@ type Phase = 'ready' | 'question' | 'done'
 type Persisted = Round & { from: Format; to: Format }
 
 const KEY = 'kanji-quiz-state.v7'
-const SIZES = [5, 10, 20, 30] // round sizes offered; 0 means the whole pool
+const SIZES = [5, 10, 20, 50, 100] // round sizes offered
+const DEFAULT_SIZE = 20
 const REVEAL_MS = 600 // how long the correct/wrong colors stay lit
 const CLEAR_MS = 220 // neutral gap while the colors fade, before the next kanji
 
 export function useQuiz() {
   const blocks = ref<Block[]>([])
   const phase = ref<Phase>('ready')
-  const chosenLevels = ref<string[]>([]) // JLPT levels in play — mixable; persisted
+  const chosenLevels = ref<string[]>([]) // the level in play, as a one-item list; persisted
   const selected = ref<string[]>([]) // category ids the user opted into; persisted
-  const size = ref(0) // kanji per round, sampled at random; 0 = every one; persisted
+  const size = ref(DEFAULT_SIZE) // kanji per round, sampled at random; persisted
   const savedLessons = ref<SavedLesson[]>([]) // rounds set aside, newest first
   const roundId = ref('') // identifies the running round when it is saved
   const queue = ref<string[]>([]) // kanji chars left in this pass; [0] is current
@@ -46,21 +47,14 @@ export function useQuiz() {
   /** The categories on offer: those of every checked level. */
   const levelBlocks = computed(() => blocksIn(blocks.value, chosenLevels.value))
 
-  /** True for the one remaining checked level — its checkbox is locked on. */
-  const isOnlyLevel = (l: string) =>
-    chosenLevels.value.length === 1 && chosenLevels.value[0] === l
+  /** The level in play. Difficulty is one level at a time. */
+  const level = computed(() => chosenLevels.value[0] ?? '')
 
-  /** Check/uncheck a level, taking or dropping its categories with it. */
-  function toggleLevel(l: string) {
-    const on = chosenLevels.value.includes(l)
-    if (on && chosenLevels.value.length === 1) return // at least one level stays on
-    const ids = blocksIn(blocks.value, [l]).map((b) => b.id)
-    chosenLevels.value = on
-      ? chosenLevels.value.filter((x) => x !== l)
-      : [...chosenLevels.value, l]
-    selected.value = on
-      ? selected.value.filter((id) => !ids.includes(id))
-      : [...new Set([...selected.value, ...ids])]
+  /** Switch difficulty: the new level's categories replace the old ones. */
+  function setLevel(l: string) {
+    if (chosenLevels.value[0] === l) return
+    chosenLevels.value = [l]
+    selected.value = blocksIn(blocks.value, [l]).map((b) => b.id)
   }
 
   // Every selected category pooled together: the pass, and the distractors.
@@ -69,11 +63,12 @@ export function useQuiz() {
   /** Only offer sizes the pool can actually fill, plus "All". */
   const queueChars = computed(() => queue.value) // what is left to ask, in order
   /** Only offer sizes the pool can actually fill, plus "All". */
-  const sizeOptions = computed(() => [...SIZES.filter((n) => n < poolSize.value), 0])
+  const sizeOptions = computed(() => {
+    const fits = SIZES.filter((n) => n <= poolSize.value)
+    return fits.length ? fits : [poolSize.value] // a pool under 5 offers only itself
+  })
   /** Questions the next round will ask. */
-  const roundSize = computed(() =>
-    size.value ? Math.min(size.value, poolSize.value) : poolSize.value,
-  )
+  const roundSize = computed(() => Math.min(size.value || DEFAULT_SIZE, poolSize.value))
   const byChar = (c: string) => pool.value.find((k) => k.char === c) ?? null
   const chosenBlocks = computed(() => blocks.value.filter((b) => selected.value.includes(b.id)))
   /** Short label for the header and the ranking row. */
@@ -110,9 +105,9 @@ export function useQuiz() {
 
   /** Load a round back into state. Levels and categories come with it. */
   function applyRound(r: Round) {
-    chosenLevels.value = r.levels
+    chosenLevels.value = r.levels.slice(0, 1)
     selected.value = r.selected
-    size.value = r.size ?? 0
+    size.value = r.size || DEFAULT_SIZE
     queue.value = r.queue
     passTotal.value = r.passTotal || r.queue.length
     incorrect.value = r.incorrect ?? []
@@ -137,12 +132,14 @@ export function useQuiz() {
     savedLessons.value = loadSaved()
     const saved = storage.load<Persisted>(KEY)
     // Level and categories are config: remembered across sessions, so no re-picking.
-    chosenLevels.value = (saved?.levels ?? []).filter((l) => levels.value.includes(l))
+    chosenLevels.value = (saved?.levels ?? [])
+      .filter((l) => levels.value.includes(l))
+      .slice(0, 1)
     if (!chosenLevels.value.length) chosenLevels.value = levels.value.slice(0, 1)
     selected.value = (saved?.selected ?? []).filter((id) =>
       levelBlocks.value.some((b) => b.id === id),
     )
-    size.value = saved?.size ?? 0
+    size.value = saved?.size || DEFAULT_SIZE
     if (!saved) {
       selected.value = levelBlocks.value.map((b) => b.id)
       return
@@ -286,8 +283,8 @@ export function useQuiz() {
     phase,
     levels,
     chosenLevels,
-    toggleLevel,
-    isOnlyLevel,
+    level,
+    setLevel,
     levelBlocks,
     selected,
     poolSize,

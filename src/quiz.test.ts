@@ -146,20 +146,21 @@ describe('useQuiz saved lessons', () => {
 })
 
 describe('useQuiz levels', () => {
-  it('keeps at least one level checked', async () => {
+  it('runs exactly one level at a time', async () => {
     const q = useQuiz()
     await q.start()
-    expect(q.chosenLevels.value).toEqual(['N5'])
-    q.toggleLevel('N5') // the only one on — refused
-    expect(q.chosenLevels.value).toEqual(['N5'])
-    expect(q.isOnlyLevel('N5')).toBe(true)
-    q.toggleLevel('N4') // mixing in a second level is fine
-    expect(q.chosenLevels.value).toEqual(['N5', 'N4'])
-    expect(q.isOnlyLevel('N5')).toBe(false)
-    q.toggleLevel('N5') // now N5 can go, N4 holds the floor
-    expect(q.chosenLevels.value).toEqual(['N4'])
+    expect(q.level.value).toBe('N5')
+
+    q.setLevel('N4')
+    expect(q.level.value).toBe('N4')
+    expect(q.chosenLevels.value).toHaveLength(1) // never two at once
     expect(q.levelBlocks.value.every((b) => b.level === 'N4')).toBe(true)
     expect(q.poolSize.value).toBeGreaterThan(0)
+
+    // Re-tapping the active level leaves the category picks alone.
+    q.selected.value = [q.levelBlocks.value[0]!.id]
+    q.setLevel('N4')
+    expect(q.selected.value).toHaveLength(1)
   })
 
   it('samples a round of the requested size at random from the pool', async () => {
@@ -167,7 +168,7 @@ describe('useQuiz levels', () => {
     await q.start()
     const chars = new Set(q.levelBlocks.value.flatMap((b) => b.kanji.map((k) => k.char)))
 
-    q.size.value = 0 // All
+    q.size.value = q.poolSize.value // the whole pool
     q.startPass()
     expect(q.passTotal.value).toBe(q.poolSize.value)
 
@@ -176,6 +177,9 @@ describe('useQuiz levels', () => {
     expect(q.passTotal.value).toBe(5)
     expect(new Set(q.queueChars.value).size).toBe(5) // no kanji asked twice
     expect(q.queueChars.value.every((c) => chars.has(c))).toBe(true)
+
+    // Every offered size is one the pool can fill, and the pool is never exceeded.
+    expect(q.sizeOptions.value.every((n) => n <= q.poolSize.value)).toBe(true)
 
     // Asking for more than the pool holds just asks everything once.
     q.size.value = 999
