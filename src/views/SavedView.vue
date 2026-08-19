@@ -17,27 +17,38 @@ const when = (iso: string) => new Date(iso).toLocaleString()
 </script>
 
 <template>
-  <EmptyState v-if="!lessons.length" src="/peace.png">
-    Nothing paused. Stop a round mid-way and it waits for you here.
-  </EmptyState>
+  <div class="saved">
+    <EmptyState v-if="!lessons.length" src="/peace.png">
+      Nothing paused. Stop a round mid-way and it waits for you here.
+    </EmptyState>
 
-  <BaseStack v-else :gap="Space.Sm">
-    <BaseCard v-for="l in lessons" :key="l.id">
-      <BaseStack :direction="Direction.Row" :align="Align.Center" :gap="Space.Sm">
-        <BaseStack grow :gap="Space.Xxs">
-          <BaseText :color="Color.Heading" bold truncate>{{ l.label }}</BaseText>
-          <BaseText :size="Size.Xs" :color="Color.Text">
-            {{ answered(l) }}/{{ l.passTotal }} answered · {{ when(l.date) }}
-          </BaseText>
-          <BaseProgress :value="(answered(l) / l.passTotal) * 100" :height="0.3" />
+    <BaseStack v-else :gap="Space.Sm">
+      <BaseCard v-for="l in lessons" :key="l.id">
+        <BaseStack :direction="Direction.Row" :align="Align.Center" :gap="Space.Sm">
+          <BaseStack grow :gap="Space.Xxs">
+            <BaseText :color="Color.Heading" bold truncate>{{ l.label }}</BaseText>
+            <BaseText :size="Size.Xs" :color="Color.Text">
+              {{ answered(l) }}/{{ l.passTotal }} answered · {{ when(l.date) }}
+            </BaseText>
+            <BaseProgress :value="(answered(l) / l.passTotal) * 100" :height="0.3" />
+          </BaseStack>
+          <BaseButton :variant="Variant.Primary" :size="Size.Sm" @click="emit('resume', l.id)">
+            Resume
+          </BaseButton>
+          <BaseButton :variant="Variant.Ghost" :size="Size.Sm" @click="emit('drop', l.id)">
+            <BaseIcon :color="Color.Text">✕</BaseIcon>
+          </BaseButton>
         </BaseStack>
-        <BaseButton :variant="Variant.Primary" :size="Size.Sm" @click="emit('resume', l.id)">
-          Resume
-        </BaseButton>
-        <BaseButton :variant="Variant.Ghost" :size="Size.Sm" @click="emit('drop', l.id)">
-          <BaseIcon :color="Color.Text">✕</BaseIcon>
-        </BaseButton>
-      </BaseStack>
-    </BaseCard>
-  </BaseStack>
+      </BaseCard>
+    </BaseStack>
+  </div>
 </template>
+
+<style scoped>
+.saved {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-hover) transparent;
+}
+</style>

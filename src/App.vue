@@ -108,11 +108,17 @@ function resumeLesson(id: string) {
 .app {
   max-width: 30rem;
   margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
+  padding: 1.5rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  min-height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+/* The active view fills the fixed-height app; it scrolls internally, page does not. */
+.app > :not(.top) {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 .top {
   display: flex;
@@ -194,7 +200,7 @@ function resumeLesson(id: string) {
   }
   .app {
     max-width: 34rem;
-    padding: 1.5rem 1.5rem 3rem;
+    padding: 1.5rem 1.5rem;
     width: 100%;
   }
 }

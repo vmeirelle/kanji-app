@@ -12,7 +12,7 @@ const progress = computed(() =>
 </script>
 
 <template>
-  <section v-if="q.question.value">
+  <section v-if="q.question.value" class="play">
     <div class="bar">
       <button class="stop" @click="q.restart">✕ Stop</button>
       <span>{{ q.position.value }}/{{ q.passTotal.value }}</span>
@@ -39,6 +39,12 @@ const progress = computed(() =>
 </template>
 
 <style scoped>
+.play {
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-hover) transparent;
+}
 .bar {
   display: flex;
   justify-content: space-between;

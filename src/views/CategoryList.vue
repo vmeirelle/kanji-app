@@ -59,7 +59,7 @@ function toggleGroup(blocks: Block[]) {
           @click="toggle(b.id)"
         >
           <span class="bg-kanji" aria-hidden="true">{{ b.kanji[0]?.char }}</span>
-          <span v-if="has(b.id)" class="check" aria-hidden="true">✓</span>
+          <span v-if="has(b.id)" class="check" aria-hidden="true">x</span>
           <span class="name">{{ b.name }}</span>
           <span class="n">{{ b.kanji.length }}</span>
         </button>

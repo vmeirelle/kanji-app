@@ -88,7 +88,10 @@ const onEnd = (e: TouchEvent) => {
 
 <style scoped>
 .rank {
-  min-height: 60vh;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-hover) transparent;
 }
 .daynav {
   display: flex;

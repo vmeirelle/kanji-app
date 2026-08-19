@@ -24,16 +24,16 @@ const sizeOptions = computed(() =>
   })),
 )
 const formatOptions = FORMATS.map((f) => ({ value: f.id, label: f.label }))
+
+// Ranked locks the config; show it regardless of leftover custom state.
+const shownSelected = computed(() =>
+  q.mode.value === 'ranked' ? q.levelBlocks.value.map((b) => b.id) : q.selected.value,
+)
 </script>
 
 <template>
   <section class="pick" :style="{ '--lv': levelColor(q.level.value) }">
     <header class="today">
-      <div class="today-text">
-        <span class="jp">今日の稽古</span>
-        <h1 class="title">Today's practice</h1>
-      </div>
-      <img class="mascot" src="/reading.png" alt="" />
     </header>
 
     <div class="card">
@@ -53,11 +53,11 @@ const formatOptions = FORMATS.map((f) => ({ value: f.id, label: f.label }))
 
       <div class="head">
         <span class="tag">Kanji per round</span>
-        <span class="sub">{{ q.roundSize.value }} of {{ q.poolSize.value }} selected</span>
+        <span class="sub">{{ q.roundSize.value }} of {{ q.poolSize.value }}</span>
       </div>
       <BaseSegment
         :options="sizeOptions"
-        :model-value="q.activeSize.value"
+        :model-value="q.mode.value === 'ranked' ? q.roundSize.value : q.activeSize.value"
         :disabled="q.mode.value === 'ranked'"
         @update:model-value="q.size.value = $event"
       />
@@ -65,20 +65,33 @@ const formatOptions = FORMATS.map((f) => ({ value: f.id, label: f.label }))
       <div class="duo">
         <div class="col">
           <span class="tag">Show (From)</span>
-          <BaseSegment :options="formatOptions" :disabled="q.mode.value === 'ranked'" v-model="q.from.value" />
+          <BaseSegment
+            :options="formatOptions"
+            :model-value="q.mode.value === 'ranked' ? 'char' : q.from.value"
+            :disabled="q.mode.value === 'ranked'"
+            @update:model-value="q.from.value = $event"
+          />
         </div>
         <div class="col">
           <span class="tag">Answer (To)</span>
-          <BaseSegment :options="formatOptions" :disabled="q.mode.value === 'ranked'" v-model="q.to.value" />
+          <BaseSegment
+            :options="formatOptions"
+            :model-value="q.mode.value === 'ranked' ? 'kana' : q.to.value"
+            :disabled="q.mode.value === 'ranked'"
+            @update:model-value="q.to.value = $event"
+          />
         </div>
       </div>
     </div>
 
-    <CategoryList
-      :blocks="q.levelBlocks.value"
-      v-model:selected="q.selected.value"
-      :disabled="q.mode.value === 'ranked'"
-    />
+    <div class="cats">
+      <CategoryList
+        :blocks="q.levelBlocks.value"
+        :selected="shownSelected"
+        :disabled="q.mode.value === 'ranked'"
+        @update:selected="q.selected.value = $event"
+      />
+    </div>
 
     <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
       {{ q.mode.value === 'ranked' ? `Start ranked · ${q.roundSize.value} words` : `Start · ${q.roundSize.value} kanji` }}
@@ -92,16 +105,46 @@ const formatOptions = FORMATS.map((f) => ({ value: f.id, label: f.label }))
   flex-direction: column;
   gap: 1.25rem;
   flex: 1;
+  min-height: 0;
 }
-.pick > .btn.primary {
-  margin-top: auto;
+/* Only the category grid scrolls; header, config and the Start button stay put.
+   scrollbar-gutter keeps the gutter reserved so tiles never shift when the
+   scrollbar comes and goes. */
+.cats {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  /* Equal padding both sides + both-edges gutter = symmetric tiles with room
+     between them and the scrollbar. */
+  padding: 0 0.5rem;
+  scrollbar-gutter: stable both-edges;
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--lv, var(--brand)) 40%, transparent) transparent;
+}
+.cats::-webkit-scrollbar {
+  width: 0.9rem;
+}
+.cats::-webkit-scrollbar-track {
+  background: transparent;
+}
+.cats::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--lv, var(--brand)) 40%, transparent);
+  border-radius: 999px;
+  /* wide transparent border = thin, floating pill with space around it */
+  border: 0.3rem solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s;
+}
+.cats::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--lv, var(--brand)) 70%, transparent);
 }
 .today {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding-bottom: 1rem;
+  padding-top: 1rem;
   border-bottom: 1px solid var(--color-border);
 }
 .today-text {
@@ -111,7 +154,6 @@ const formatOptions = FORMATS.map((f) => ({ value: f.id, label: f.label }))
 }
 .jp {
   font-family: var(--font-kanji);
-  font-size: 0.8rem;
   color: var(--lv, var(--brand));
 }
 .title {
