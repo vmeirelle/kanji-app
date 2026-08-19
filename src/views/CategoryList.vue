@@ -58,6 +58,8 @@ function toggleGroup(blocks: Block[]) {
           :aria-pressed="has(b.id)"
           @click="toggle(b.id)"
         >
+          <span class="bg-kanji" aria-hidden="true">{{ b.kanji[0]?.char }}</span>
+          <span v-if="has(b.id)" class="check" aria-hidden="true">✓</span>
           <span class="name">{{ b.name }}</span>
           <span class="n">{{ b.kanji.length }}</span>
         </button>
@@ -103,6 +105,8 @@ function toggleGroup(blocks: Block[]) {
   gap: 0.5rem;
 }
 .tile {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -117,6 +121,26 @@ function toggleGroup(blocks: Block[]) {
   cursor: pointer;
   transition: transform 0.08s, border-color 0.15s, background 0.15s, color 0.15s;
 }
+.bg-kanji {
+  position: absolute;
+  right: -1.25rem;
+  bottom: -1.75rem;
+  font-family: var(--font-kanji);
+  font-size: 5.4rem;
+  line-height: 1;
+  color: currentColor;
+  opacity: 0.14;
+  pointer-events: none;
+  z-index: 0;
+}
+.check {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.4rem;
+  font-size: 0.72rem;
+  line-height: 1;
+  z-index: 1;
+}
 .tile:active {
   transform: scale(0.96);
 }
@@ -127,6 +151,8 @@ function toggleGroup(blocks: Block[]) {
   transform: none;
 }
 .name {
+  position: relative;
+  z-index: 1;
   font-size: 0.75rem;
   line-height: 1.15;
   text-align: center;
@@ -138,6 +164,8 @@ function toggleGroup(blocks: Block[]) {
   overflow: hidden;
 }
 .n {
+  position: relative;
+  z-index: 1;
   font-size: 0.65rem;
   opacity: 0.7;
   font-variant-numeric: tabular-nums;
