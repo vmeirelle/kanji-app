@@ -5,7 +5,6 @@ import { Size, Color, Align, Direction, Space, Variant } from '../composables/us
 import BaseText from '../components/base/BaseText.vue'
 import BaseButton from '../components/base/BaseButton.vue'
 import BaseIcon from '../components/base/BaseIcon.vue'
-import BaseCard from '../components/base/BaseCard.vue'
 import BaseStack from '../components/base/BaseStack.vue'
 import BaseProgress from '../components/base/BaseProgress.vue'
 import EmptyState from '../components/base/EmptyState.vue'
@@ -30,7 +29,7 @@ const when = (iso: string) => new Date(iso).toLocaleString()
       </EmptyState>
 
       <BaseStack v-else :gap="Space.Sm">
-        <BaseCard v-for="l in lessons" :key="l.id" :style="{ '--lv': levelColor(levelOf(l)) }">
+        <div class="lesson" v-for="l in lessons" :key="l.id" :style="{ '--lv': levelColor(levelOf(l)) }">
           <BaseStack :direction="Direction.Row" :align="Align.Center" :gap="Space.Sm">
             <span class="lvl">{{ levelOf(l) }}</span>
             <BaseStack grow :gap="Space.Xxs">
@@ -40,14 +39,18 @@ const when = (iso: string) => new Date(iso).toLocaleString()
               <BaseText :size="Size.Xs" :color="Color.Text">
                 {{ answered(l) }}/{{ l.passTotal }} answered · {{ when(l.date) }}
               </BaseText>
-              <BaseProgress :value="(answered(l) / l.passTotal) * 100" :height="0.3" />
+              <BaseProgress
+                :value="(answered(l) / l.passTotal) * 100"
+                :height="0.3"
+                color="var(--lv)"
+              />
             </BaseStack>
             <button class="resume" @click="emit('resume', l.id)">Resume</button>
             <BaseButton :variant="Variant.Ghost" :size="Size.Sm" @click="emit('drop', l.id)">
               <BaseIcon :color="Color.Text">✕</BaseIcon>
             </BaseButton>
           </BaseStack>
-        </BaseCard>
+        </div>
       </BaseStack>
     </div>
   </div>
@@ -68,6 +71,12 @@ const when = (iso: string) => new Date(iso).toLocaleString()
   scrollbar-width: thin;
   scrollbar-color: var(--color-border-hover) transparent;
 }
+.lesson {
+  padding: 0.85rem;
+  border: 2px solid color-mix(in srgb, var(--lv) 35%, var(--color-border));
+  border-radius: 0.9rem;
+  background: color-mix(in srgb, var(--lv) 9%, var(--color-background));
+}
 .lvl {
   flex: none;
   align-self: flex-start;
@@ -76,5 +85,16 @@ const when = (iso: string) => new Date(iso).toLocaleString()
   font-size: 1.05rem;
   letter-spacing: 0.04em;
   color: var(--lv, var(--brand));
+}
+.resume {
+  flex: none;
+  border: none;
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.9rem;
+  background: var(--lv, var(--brand));
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 </style>

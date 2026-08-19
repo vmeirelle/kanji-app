@@ -3,7 +3,7 @@ import { computed, type CSSProperties } from 'vue'
 import { useTheme, Color } from '../../composables/useTheme'
 
 const props = withDefaults(
-  defineProps<{ value: number; height?: number }>(),
+  defineProps<{ value: number; height?: number; color?: string }>(),
   { height: 0.5 },
 )
 const theme = useTheme()
@@ -13,7 +13,7 @@ const trackStyle = computed<CSSProperties>(() => ({
 }))
 const fillStyle = computed<CSSProperties>(() => ({
   width: `${props.value}%`,
-  background: theme.color(Color.Brand),
+  background: props.color ?? theme.color(Color.Brand),
 }))
 </script>
 
