@@ -7,7 +7,7 @@ const emit = defineEmits<{ practice: [] }>()
 
 <template>
   <section class="vocab">
-    <PageHeader jp="語彙" title="Vocabulary" image="/peace.png" />
+    <PageHeader jp="文章" title="Reading" image="/reading.png" />
 
     <div class="scroll">
       <div class="hero">

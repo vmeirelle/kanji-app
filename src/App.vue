@@ -7,6 +7,7 @@ import { useBreakpoint } from './composables/useBreakpoint'
 import AppBrand from './components/base/AppBrand.vue'
 import KanjiBadge from './components/base/KanjiBadge.vue'
 import FadeTransition from './components/base/FadeTransition.vue'
+import HomeView from './views/HomeView.vue'
 import LearnView from './views/LearnView.vue'
 import BasicsView from './views/BasicsView.vue'
 import VocabularyView from './views/VocabularyView.vue'
@@ -19,9 +20,10 @@ import BaseText from './components/base/BaseText.vue'
 import { Size } from './composables/useTheme'
 
 const NAV: NavItem[] = [
-  { id: 'learn', label: 'Learn', kanji: '学' },
+  { id: 'home', label: 'Home', kanji: '家' },
   { id: 'basics', label: 'Basics', kanji: 'あ' },
-  { id: 'vocab', label: 'Vocabulary', kanji: '語' },
+  { id: 'learn', label: 'Learn', kanji: '学' },
+  { id: 'vocab', label: 'Reading', kanji: '読' },
   { id: 'saved', label: 'Unfinished', kanji: '未' },
   { id: 'ranking', label: 'Ranking', kanji: '位' },
   { id: 'settings', label: 'Settings', kanji: '設' },
@@ -32,7 +34,7 @@ const basics = useBasics()
 const { rankings } = useRankings()
 useSettings()
 const { isDesktop } = useBreakpoint()
-const view = ref('learn')
+const view = ref('home')
 const menuOpen = ref(false)
 
 onMounted(() => {
@@ -48,7 +50,7 @@ function go(id: string) {
 }
 
 function goHome() {
-  view.value = 'learn'
+  view.value = 'home'
   menuOpen.value = false
   if (q.phase.value !== 'ready') q.restart()
 }
@@ -99,7 +101,9 @@ function resumeLesson(id: string) {
       />
 
       <FadeTransition>
-        <LearnView v-if="view === 'learn'" />
+        <HomeView v-if="view === 'home'" @go="go" />
+
+        <LearnView v-else-if="view === 'learn'" />
 
         <BasicsView v-else-if="view === 'basics'" />
 
