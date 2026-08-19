@@ -60,15 +60,23 @@ export function useQuiz() {
   // Every selected category pooled together: the pass, and the distractors.
   const pool = computed(() => poolOf(blocks.value, selected.value))
   const poolSize = computed(() => pool.value.length)
-  /** Only offer sizes the pool can actually fill, plus "All". */
   const queueChars = computed(() => queue.value) // what is left to ask, in order
-  /** Only offer sizes the pool can actually fill, plus "All". */
-  const sizeOptions = computed(() => {
+  /** Always offer the full set of sizes — like the JLPT levels, it never changes
+   *  shape. Sizes the pool can't fill are locked rather than hidden. */
+  const sizeOptions = computed(() => SIZES)
+  /** Locked when the pool can't fill it; the smallest option always stays open. */
+  const sizeLocked = (n: number) => n > poolSize.value && n !== SIZES[0]
+  /** Largest offered size the pool can fill (falls back to the smallest). */
+  const maxSize = computed(() => {
     const fits = SIZES.filter((n) => n <= poolSize.value)
-    return fits.length ? fits : [poolSize.value] // a pool under 5 offers only itself
+    return fits.length ? fits[fits.length - 1]! : SIZES[0]!
   })
+  /** The size button shown as active: the chosen size, clamped to what fits. */
+  const activeSize = computed(() =>
+    (size.value || DEFAULT_SIZE) <= poolSize.value ? size.value || DEFAULT_SIZE : maxSize.value,
+  )
   /** Questions the next round will ask. */
-  const roundSize = computed(() => Math.min(size.value || DEFAULT_SIZE, poolSize.value))
+  const roundSize = computed(() => Math.min(activeSize.value, poolSize.value))
   const byChar = (c: string) => pool.value.find((k) => k.char === c) ?? null
   const chosenBlocks = computed(() => blocks.value.filter((b) => selected.value.includes(b.id)))
   /** Short label for the header and the ranking row. */
@@ -290,6 +298,8 @@ export function useQuiz() {
     poolSize,
     size,
     sizeOptions,
+    sizeLocked,
+    activeSize,
     queueChars,
     roundSize,
     savedLessons,

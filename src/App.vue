@@ -142,8 +142,10 @@ function finish() {
               :key="n"
               type="button"
               class="seg-btn"
-              :class="{ on: q.roundSize.value === n }"
-              :aria-pressed="q.roundSize.value === n"
+              :class="{ on: q.activeSize.value === n }"
+              :disabled="q.sizeLocked(n)"
+              :aria-pressed="q.activeSize.value === n"
+              :title="q.sizeLocked(n) ? `Only ${q.poolSize.value} kanji at this level` : undefined"
               @click="q.size.value = n"
             >
               <span class="seg-main">{{ n }}</span>
@@ -244,6 +246,7 @@ function finish() {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  min-height: 100vh; /* so the pick screen can pin its Start button to the bottom */
 }
 .top {
   display: flex;
@@ -260,10 +263,8 @@ function finish() {
   padding: 0.25rem 0.5rem;
 }
 .brand {
-  flex: 1;
+  margin-left: auto; /* push the logo to the right edge */
   display: flex;
-  justify-content: center;
-  margin-right: 2.5rem; /* balance the hamburger so the logo stays centered */
   border: none;
   background: transparent;
   padding: 0;
@@ -341,6 +342,12 @@ function finish() {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  flex: 1; /* fill the app column so Start can sit at the bottom */
+}
+/* Start stays anchored to the bottom, so it doesn't jump when the category
+   count changes between levels. */
+.pick > .btn.primary {
+  margin-top: auto;
 }
 .card {
   display: flex;
@@ -399,6 +406,11 @@ function finish() {
   background: var(--lv, var(--brand));
   color: #fff;
   font-weight: 600;
+}
+/* Locked: the pool at this level can't fill this size. */
+.seg-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }
 .lead {
   text-align: center;

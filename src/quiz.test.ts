@@ -178,12 +178,18 @@ describe('useQuiz levels', () => {
     expect(new Set(q.queueChars.value).size).toBe(5) // no kanji asked twice
     expect(q.queueChars.value.every((c) => chars.has(c))).toBe(true)
 
-    // Every offered size is one the pool can fill, and the pool is never exceeded.
-    expect(q.sizeOptions.value.every((n) => n <= q.poolSize.value)).toBe(true)
+    // The sizes are a fixed set — always the same shape, like the JLPT levels.
+    // Sizes the pool can't fill are locked rather than hidden.
+    const opts = q.sizeOptions.value
+    expect(opts.length).toBe(5)
+    expect(opts.some((n) => q.sizeLocked(n))).toBe(true) // N5's largest is unreachable
+    expect(opts.every((n) => q.sizeLocked(n) === (n > q.poolSize.value && n !== opts[0]))).toBe(true)
 
-    // Asking for more than the pool holds just asks everything once.
+    // A locked size is never actually played: the round clamps to what fits, and
+    // the played count matches the active (highlighted) size.
     q.size.value = 999
     q.startPass()
-    expect(q.passTotal.value).toBe(q.poolSize.value)
+    expect(q.passTotal.value).toBeLessThanOrEqual(q.poolSize.value)
+    expect(q.passTotal.value).toBe(q.roundSize.value)
   })
 })
