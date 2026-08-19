@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useQuiz } from '../composables/useQuiz'
 import { levelColor } from '../data/blocks'
-import { FORMATS } from '../quiz'
+import { FORMATS, type Format } from '../quiz'
 import BaseSegment from '../components/base/BaseSegment.vue'
 import PageHeader from '../components/base/PageHeader.vue'
 import CategoryList from './CategoryList.vue'
@@ -25,6 +25,16 @@ const sizeOptions = computed(() =>
   })),
 )
 const formatOptions = FORMATS.map((f) => ({ value: f.id, label: f.label }))
+
+// Show and Answer can't be the same format — picking a match swaps them.
+function setFrom(v: Format) {
+  if (v === q.to.value) q.to.value = q.from.value
+  q.from.value = v
+}
+function setTo(v: Format) {
+  if (v === q.from.value) q.from.value = q.to.value
+  q.to.value = v
+}
 
 // Ranked locks the config; show it regardless of leftover custom state.
 const shownSelected = computed(() =>
@@ -69,7 +79,7 @@ const shownSelected = computed(() =>
             :options="formatOptions"
             :model-value="q.mode.value === 'ranked' ? 'char' : q.from.value"
             :disabled="q.mode.value === 'ranked'"
-            @update:model-value="q.from.value = $event"
+            @update:model-value="setFrom($event as Format)"
           />
         </div>
         <div class="col">
@@ -78,7 +88,7 @@ const shownSelected = computed(() =>
             :options="formatOptions"
             :model-value="q.mode.value === 'ranked' ? 'kana' : q.to.value"
             :disabled="q.mode.value === 'ranked'"
-            @update:model-value="q.to.value = $event"
+            @update:model-value="setTo($event as Format)"
           />
         </div>
       </div>
