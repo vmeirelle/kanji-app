@@ -16,3 +16,7 @@ export const blocksIn = (blocks: Block[], levels: string[]): Block[] =>
 /** The kanji the user has opted into — the quiz pool and its distractors. */
 export const poolOf = (blocks: Block[], ids: string[]): Kanji[] =>
   blocks.filter((b) => ids.includes(b.id)).flatMap((b) => b.kanji)
+
+/** A level's accent colour, blue (easiest) to red (hardest). */
+export const levelColor = (level: string): string =>
+  `var(--lv-${level}, var(--color-border-hover))`

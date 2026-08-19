@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Block } from '../data/blocks'
+import { levelColor, type Block } from '../data/blocks'
 
 const props = defineProps<{ blocks: Block[]; selected: string[] }>()
 const emit = defineEmits<{ 'update:selected': [string[]] }>()
@@ -27,7 +27,13 @@ function toggleAll() {
         {{ blocks.every((b) => has(b.id)) ? 'None' : 'All' }}
       </button>
     </div>
-    <label v-for="b in blocks" :key="b.id" class="row" :class="{ on: has(b.id) }">
+    <label
+      v-for="b in blocks"
+      :key="b.id"
+      class="row"
+      :class="{ on: has(b.id) }"
+      :style="{ '--lv': levelColor(b.level) }"
+    >
       <input type="checkbox" :checked="has(b.id)" @change="toggle(b.id)" />
       <span class="name"><span class="lv">{{ b.level }}</span>{{ b.name }}</span>
       <span class="count">{{ b.kanji.length }}</span>
@@ -77,7 +83,7 @@ function toggleAll() {
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: var(--color-text);
+  color: var(--lv);
 }
 .row.on .name {
   color: var(--color-heading);
@@ -86,7 +92,7 @@ function toggleAll() {
 input {
   width: 1.1rem;
   height: 1.1rem;
-  accent-color: var(--brand);
+  accent-color: var(--lv);
 }
 .count {
   font-size: 0.85rem;

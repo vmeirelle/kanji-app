@@ -2,6 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useQuiz } from './useQuiz'
 import { loadRankings, addRanking, today, pointsOf, type Ranking } from './rankings'
+import { levelColor } from './data/blocks'
 import CategoryList from './components/CategoryList.vue'
 import QuizView from './components/QuizView.vue'
 import RankingView from './components/RankingView.vue'
@@ -122,6 +123,7 @@ function finish() {
               :key="l"
               class="chip"
               :class="{ on: q.chosenLevels.value.includes(l) }"
+              :style="{ '--lv': levelColor(l) }"
             >
               <input
                 type="checkbox"
@@ -375,14 +377,14 @@ function finish() {
   cursor: pointer;
 }
 .chip.on {
-  border-color: var(--brand);
-  color: var(--color-heading);
+  border-color: var(--lv, var(--brand));
+  color: var(--lv, var(--color-heading));
   font-weight: 600;
 }
 .chip input {
   width: 1rem;
   height: 1rem;
-  accent-color: var(--brand);
+  accent-color: var(--lv, var(--brand));
 }
 /* The last level on cannot be turned off — the pool would be empty. */
 .chip input:disabled {
