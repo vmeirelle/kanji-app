@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { FORMATS, modeOf, buildQuestion } from './quiz'
 import blocks from './data/blocks.json'
-import type { Block, Kanji } from './data/blocks'
+import { byLevel, poolOf, type Block, type Kanji } from './data/blocks'
 
 const pool: Kanji[] = Array.from({ length: 12 }, (_, i) => ({
   char: `c${i}`,
@@ -51,4 +51,31 @@ describe('seed data yields 9 options for every kanji and answer format', () => {
       })
     }
   }
+})
+
+describe('category selection', () => {
+  const all = blocks as Block[]
+
+  it('groups blocks by level, N5 first, keeping every block', () => {
+    const groups = byLevel(all)
+    expect(groups[0]!.level).toBe('N5')
+    expect(groups.flatMap((g) => g.blocks)).toHaveLength(all.length)
+    expect(new Set(groups.map((g) => g.level)).size).toBe(groups.length)
+  })
+
+  it('pools only the selected categories', () => {
+    const [a, b] = all
+    const pool = poolOf(all, [a!.id, b!.id])
+    expect(pool).toHaveLength(a!.kanji.length + b!.kanji.length)
+    expect(poolOf(all, [])).toHaveLength(0)
+    expect(poolOf(all, ['nope'])).toHaveLength(0)
+  })
+
+  it('builds 9 distinct options from a multi-category pool', () => {
+    const pool = poolOf(all, all.map((b) => b.id))
+    for (const fmt of FORMATS) {
+      const q = buildQuestion(pool[0]!, pool, modeOf('char', fmt.id), 9)
+      expect(new Set(q.options.map((o) => o.label)).size).toBe(9)
+    }
+  })
 })
