@@ -5,12 +5,14 @@ import { loadRankings, addRanking, today, pointsOf, type Ranking } from './ranki
 import CategoryList from './components/CategoryList.vue'
 import QuizView from './components/QuizView.vue'
 import RankingView from './components/RankingView.vue'
+import SavedView from './components/SavedView.vue'
 import SettingsView from './components/SettingsView.vue'
 import NavDrawer, { type NavItem } from './components/NavDrawer.vue'
 
 // The menu is data-driven — add a NavItem (and a matching branch) for new tabs.
 const NAV: NavItem[] = [
   { id: 'learn', label: 'Learn', icon: '📖' },
+  { id: 'saved', label: 'Unfinished', icon: '⏸️' },
   { id: 'ranking', label: 'Ranking', icon: '🏆' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ]
@@ -44,6 +46,12 @@ function goHome() {
   if (q.phase.value !== 'ready') q.restart()
 }
 
+// Picking up a paused lesson drops you straight back into the questions.
+function resumeLesson(id: string) {
+  q.resume(id)
+  view.value = 'learn'
+}
+
 function saveScore() {
   if (!name.value.trim() || saved.value || !q.selected.value.length) return
   rankings.value = addRanking({
@@ -66,13 +74,32 @@ function finish() {
 </script>
 
 <template>
-  <main class="app">
-    <header class="top">
-      <button class="ham" aria-label="Menu" @click="menuOpen = !menuOpen">☰</button>
-      <button class="brand" aria-label="Home" @click="goHome">
+  <div class="shell">
+    <!-- Desktop navigation. Narrow screens hide this and use the drawer instead. -->
+    <aside class="side">
+      <button class="side-brand" aria-label="Home" @click="goHome">
         <img class="logo" src="/logo.png" alt="Kanji Quiz" />
       </button>
-    </header>
+      <nav class="tabs">
+        <button
+          v-for="item in NAV"
+          :key="item.id"
+          class="tab"
+          :class="{ active: item.id === view }"
+          @click="go(item.id)"
+        >
+          <span v-if="item.icon" class="ic">{{ item.icon }}</span>{{ item.label }}
+        </button>
+      </nav>
+    </aside>
+
+    <main class="app">
+      <header class="top">
+        <button class="ham" aria-label="Menu" @click="menuOpen = !menuOpen">☰</button>
+        <button class="brand" aria-label="Home" @click="goHome">
+          <img class="logo" src="/logo.png" alt="Kanji Quiz" />
+        </button>
+      </header>
 
     <NavDrawer
       :open="menuOpen"
@@ -105,12 +132,30 @@ function finish() {
               {{ l }}
             </label>
           </div>
+
+          <span class="tag">Kanji per round</span>
+          <div class="chips">
+            <label
+              v-for="n in q.sizeOptions.value"
+              :key="n"
+              class="chip"
+              :class="{ on: q.size.value === n }"
+            >
+              <input
+                type="radio"
+                name="size"
+                :checked="q.size.value === n"
+                @change="q.size.value = n"
+              />
+              {{ n || 'All' }}
+            </label>
+          </div>
         </div>
 
         <CategoryList :blocks="q.levelBlocks.value" v-model:selected="q.selected.value" />
 
         <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
-          Start · {{ q.poolSize.value }} kanji
+          Start · {{ q.roundSize.value }} kanji
         </button>
       </section>
 
@@ -172,15 +217,27 @@ function finish() {
       </div>
     </template>
 
+    <!-- UNFINISHED -->
+    <SavedView
+      v-else-if="view === 'saved'"
+      :lessons="q.savedLessons.value"
+      @resume="resumeLesson"
+      @drop="q.drop"
+    />
+
     <!-- RANKING -->
     <RankingView v-else-if="view === 'ranking'" :rankings="rankings" />
 
     <!-- SETTINGS -->
     <SettingsView v-else v-model:from="q.from.value" v-model:to="q.to.value" />
-  </main>
+    </main>
+  </div>
 </template>
 
 <style scoped>
+.shell {
+  width: 100%;
+}
 .app {
   max-width: 30rem;
   margin: 0 auto;
@@ -216,6 +273,69 @@ function finish() {
 .logo {
   height: 2.6rem;
   border-radius: 0.5rem;
+}
+.side {
+  display: none; /* mobile: the drawer covers navigation */
+}
+.side-brand {
+  border: none;
+  background: transparent;
+  padding: 0 0.5rem;
+  cursor: pointer;
+  align-self: flex-start;
+}
+.tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border: none;
+  border-radius: 0.6rem;
+  background: transparent;
+  color: var(--color-heading);
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.tab:hover {
+  background: var(--color-background-soft);
+}
+.tab.active {
+  background: var(--color-background-soft);
+  color: var(--brand);
+  font-weight: 600;
+}
+
+/* Desktop: a standing sidebar replaces the header and the drawer. */
+@media (min-width: 48rem) {
+  /* Sidebar hugs the left edge; the content centres in whatever is left. */
+  .shell {
+    display: grid;
+    grid-template-columns: 13rem minmax(0, 1fr);
+  }
+  .side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    padding: 1.5rem 0.75rem;
+    border-right: 1px solid var(--color-border);
+    min-height: 100vh;
+  }
+  .top {
+    display: none; /* logo and nav live in the sidebar */
+  }
+  .app {
+    max-width: 34rem;
+    padding: 1.5rem 1.5rem 3rem;
+  }
 }
 .pick {
   display: flex;

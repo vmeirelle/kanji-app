@@ -92,6 +92,53 @@ describe('category selection', () => {
   })
 })
 
+describe('useQuiz saved lessons', () => {
+  it('sets an unfinished round aside and picks it back up', async () => {
+    const q = useQuiz()
+    await q.start()
+    q.size.value = 10
+    q.startPass()
+    q.answer(q.question.value!.options[0]!.key)
+    q.next() // one question down, nine to go
+    const left = q.queueChars.value.length
+    expect(left).toBe(9)
+
+    q.restart() // Stop
+    expect(q.phase.value).toBe('ready')
+    expect(q.savedLessons.value).toHaveLength(1)
+    const lesson = q.savedLessons.value[0]!
+    expect(lesson.queue).toHaveLength(9)
+    expect(lesson.passTotal).toBe(10)
+    expect(lesson.label).toBe(q.selectionName.value)
+
+    q.resume(lesson.id)
+    expect(q.phase.value).toBe('question')
+    expect(q.queueChars.value).toHaveLength(9)
+    expect(q.passTotal.value).toBe(10)
+    expect(q.position.value).toBe(2) // back on question 2 of 10
+    expect(q.savedLessons.value).toHaveLength(0) // it is live again, not paused
+
+    // A round played to the end has nothing to set aside.
+    while (q.phase.value === 'question') {
+      q.answer(q.question.value!.options[0]!.key)
+      q.next()
+    }
+    expect(q.phase.value).toBe('done')
+    q.restart() // Finish
+    expect(q.savedLessons.value).toHaveLength(0)
+  })
+
+  it('deletes a paused lesson on request', async () => {
+    const q = useQuiz()
+    await q.start()
+    q.startPass()
+    q.restart()
+    const id = q.savedLessons.value[0]!.id
+    q.drop(id)
+    expect(q.savedLessons.value).toHaveLength(0)
+  })
+})
+
 describe('useQuiz levels', () => {
   it('keeps at least one level checked', async () => {
     const q = useQuiz()
@@ -107,5 +154,26 @@ describe('useQuiz levels', () => {
     expect(q.chosenLevels.value).toEqual(['N4'])
     expect(q.levelBlocks.value.every((b) => b.level === 'N4')).toBe(true)
     expect(q.poolSize.value).toBeGreaterThan(0)
+  })
+
+  it('samples a round of the requested size at random from the pool', async () => {
+    const q = useQuiz()
+    await q.start()
+    const chars = new Set(q.levelBlocks.value.flatMap((b) => b.kanji.map((k) => k.char)))
+
+    q.size.value = 0 // All
+    q.startPass()
+    expect(q.passTotal.value).toBe(q.poolSize.value)
+
+    q.size.value = 5
+    q.startPass()
+    expect(q.passTotal.value).toBe(5)
+    expect(new Set(q.queueChars.value).size).toBe(5) // no kanji asked twice
+    expect(q.queueChars.value.every((c) => chars.has(c))).toBe(true)
+
+    // Asking for more than the pool holds just asks everything once.
+    q.size.value = 999
+    q.startPass()
+    expect(q.passTotal.value).toBe(q.poolSize.value)
   })
 })

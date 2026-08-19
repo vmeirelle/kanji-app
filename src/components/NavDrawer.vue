@@ -39,6 +39,12 @@ const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
   inset: 0;
   z-index: 20;
 }
+/* Desktop navigates with the header tabs, so the drawer never shows. */
+@media (min-width: 48rem) {
+  .wrap {
+    display: none;
+  }
+}
 .backdrop {
   position: absolute;
   inset: 0;
