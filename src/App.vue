@@ -9,6 +9,7 @@ import KanjiBadge from './components/base/KanjiBadge.vue'
 import FadeTransition from './components/base/FadeTransition.vue'
 import LearnView from './views/LearnView.vue'
 import BasicsView from './views/BasicsView.vue'
+import VocabularyView from './views/VocabularyView.vue'
 import RankingView from './views/RankingView.vue'
 import SavedView from './views/SavedView.vue'
 import SettingsView from './views/SettingsView.vue'
@@ -20,6 +21,7 @@ import { Size } from './composables/useTheme'
 const NAV: NavItem[] = [
   { id: 'learn', label: 'Learn', kanji: '学' },
   { id: 'basics', label: 'Basics', kanji: 'あ' },
+  { id: 'vocab', label: 'Vocabulary', kanji: '語' },
   { id: 'saved', label: 'Unfinished', kanji: '未' },
   { id: 'ranking', label: 'Ranking', kanji: '位' },
   { id: 'settings', label: 'Settings', kanji: '設' },
@@ -100,6 +102,8 @@ function resumeLesson(id: string) {
         <LearnView v-if="view === 'learn'" />
 
         <BasicsView v-else-if="view === 'basics'" />
+
+        <VocabularyView v-else-if="view === 'vocab'" @practice="go('learn')" />
 
         <SavedView
           v-else-if="view === 'saved'"
