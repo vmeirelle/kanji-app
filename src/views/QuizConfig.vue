@@ -28,6 +28,14 @@ const formatOptions = FORMATS.map((f) => ({ value: f.id, label: f.label }))
 
 <template>
   <section class="pick" :style="{ '--lv': levelColor(q.level.value) }">
+    <header class="today">
+      <div class="today-text">
+        <span class="jp">今日の稽古</span>
+        <h1 class="title">Today's practice</h1>
+      </div>
+      <img class="mascot" src="/reading.png" alt="" />
+    </header>
+
     <div class="card">
       <span class="tag">Game</span>
       <BaseSegment
@@ -87,6 +95,40 @@ const formatOptions = FORMATS.map((f) => ({ value: f.id, label: f.label }))
 }
 .pick > .btn.primary {
   margin-top: auto;
+}
+.today {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--color-border);
+}
+.today-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.jp {
+  font-family: var(--font-kanji);
+  font-size: 0.8rem;
+  color: var(--lv, var(--brand));
+}
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-heading);
+}
+.count {
+  font-size: 0.85rem;
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}
+.mascot {
+  width: 4.5rem;
+  height: auto;
+  flex: none;
 }
 .card {
   display: flex;
