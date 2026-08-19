@@ -81,6 +81,11 @@ const progress = computed(() =>
   justify-content: center;
   padding-bottom: 1.5rem;
 }
+@media (min-width: 48rem) {
+  .tap-next {
+    left: var(--sidebar);
+  }
+}
 .tap-hint {
   color: var(--color-text);
   font-size: 0.85rem;

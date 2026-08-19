@@ -109,9 +109,8 @@ function createQuiz() {
     firstTotal.value ? Math.round((firstCorrect.value / firstTotal.value) * 100) : 0,
   )
 
-  const canRetry = computed(
-    () => mode.value === 'custom' && incorrectCount.value > 0 && !hasRetried.value,
-  )
+  // Custom rounds can retry their misses repeatedly until none remain.
+  const canRetry = computed(() => mode.value === 'custom' && incorrectCount.value > 0)
 
 
   const roundOf = (): Round => ({
@@ -377,6 +376,7 @@ function createQuiz() {
     wrong,
     incorrectCount,
     canRetry,
+    hasRetried,
     pct,
     firstCorrect,
     firstTotal,

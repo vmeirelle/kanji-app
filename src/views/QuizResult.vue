@@ -64,6 +64,19 @@ function finish() {
         {{ q.level.value }} · {{ q.mode.value === 'ranked' ? 'Ranked' : 'Custom' }}
       </BaseText>
 
+      <BaseText
+        v-if="q.hasRetried.value"
+        :size="Size.Xs"
+        :color="q.incorrectCount.value ? Color.Text : Color.Correct"
+        :align="Align.Center"
+        bold
+      >
+        <template v-if="q.incorrectCount.value">
+          Retry {{ q.correct.value }}/{{ q.passTotal.value }} · {{ q.incorrectCount.value }} to go
+        </template>
+        <template v-else>All misses cleared ✓</template>
+      </BaseText>
+
       <BaseButton v-if="q.canRetry.value" :variant="Variant.Plain" block @click="q.retryIncorrect">
         Retry incorrect ({{ q.incorrectCount.value }})
       </BaseButton>
@@ -97,11 +110,19 @@ function finish() {
 .overlay {
   position: fixed;
   inset: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1rem;
   background: rgba(0, 0, 0, 0.5);
+}
+/* Backdrop covers the sidebar (so the menu recedes), but the modal box stays
+   centred in the content column. */
+@media (min-width: 48rem) {
+  .overlay {
+    padding-left: calc(var(--sidebar) + 1rem);
+  }
 }
 .modal {
   width: 100%;

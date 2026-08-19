@@ -174,7 +174,7 @@ function resumeLesson(id: string) {
 @media (min-width: 48rem) {
   .shell {
     display: grid;
-    grid-template-columns: 13rem minmax(0, 1fr);
+    grid-template-columns: var(--sidebar) minmax(0, 1fr);
   }
   .side {
     display: flex;
