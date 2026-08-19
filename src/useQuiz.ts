@@ -253,6 +253,8 @@ export function useQuiz() {
     incorrectCount,
     canRetry,
     pct,
+    firstCorrect,
+    firstTotal,
     from,
     to,
     start,

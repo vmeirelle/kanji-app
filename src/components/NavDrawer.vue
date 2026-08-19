@@ -10,7 +10,10 @@ const emit = defineEmits<{ select: [id: string]; close: [] }>()
     <div v-if="open" class="wrap">
       <div class="backdrop" @click="emit('close')" />
       <aside class="panel">
-        <div class="brand"><img class="brand-logo" src="/logo.png" alt="Kanji Quiz" /></div>
+        <div class="top">
+          <button class="ham" aria-label="Close menu" @click="emit('close')">☰</button>
+          <div class="brand"><img class="brand-logo" src="/logo.png" alt="Kanji Quiz" /></div>
+        </div>
         <nav class="nav">
           <button
             v-for="item in items"
@@ -52,6 +55,20 @@ const emit = defineEmits<{ select: [id: string]; close: [] }>()
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+.top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.ham {
+  border: none;
+  background: transparent;
+  color: var(--color-heading);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
 }
 .brand {
   padding: 0 0.5rem;

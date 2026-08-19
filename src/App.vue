@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useQuiz } from './useQuiz'
-import { loadRankings, addRanking, today, type Ranking } from './rankings'
+import { loadRankings, addRanking, today, pointsOf, type Ranking } from './rankings'
 import CategoryList from './components/CategoryList.vue'
 import QuizView from './components/QuizView.vue'
 import RankingView from './components/RankingView.vue'
@@ -37,13 +37,21 @@ function go(id: string) {
   menuOpen.value = false
 }
 
+// The logo is Home: back to Learn, abandoning any run in progress.
+function goHome() {
+  view.value = 'learn'
+  menuOpen.value = false
+  if (q.phase.value !== 'ready') q.restart()
+}
+
 function saveScore() {
   if (!name.value.trim() || saved.value || !q.selected.value.length) return
   rankings.value = addRanking({
     name: name.value.trim(),
     blockId: q.selectionId.value,
     blockName: q.selectionName.value,
-    pct: q.pct.value,
+    correct: q.firstCorrect.value,
+    total: q.firstTotal.value,
     day: today(),
     date: new Date().toISOString(),
   })
@@ -61,7 +69,9 @@ function finish() {
   <main class="app">
     <header class="top">
       <button class="ham" aria-label="Menu" @click="menuOpen = !menuOpen">☰</button>
-      <div class="brand"><img class="logo" src="/logo.png" alt="Kanji Quiz" /></div>
+      <button class="brand" aria-label="Home" @click="goHome">
+        <img class="logo" src="/logo.png" alt="Kanji Quiz" />
+      </button>
     </header>
 
     <NavDrawer
@@ -114,8 +124,11 @@ function finish() {
       <div v-else class="overlay">
         <div class="modal">
           <p class="lead">Round complete 🎉</p>
-          <p class="score">{{ q.pct.value }}%</p>
-          <p class="hint">First-try score on {{ q.selectionName.value }}</p>
+          <p class="score">{{ pointsOf(q.firstCorrect.value, q.firstTotal.value) }} pts</p>
+          <p class="hint">
+            {{ q.firstCorrect.value }}/{{ q.firstTotal.value }} correct · {{ q.pct.value }}%
+          </p>
+          <p class="hint">First try on {{ q.selectionName.value }}</p>
 
           <button v-if="q.canRetry.value" class="btn" @click="q.retryIncorrect">
             Retry incorrect ({{ q.incorrectCount.value }})
@@ -183,6 +196,10 @@ function finish() {
   display: flex;
   justify-content: center;
   margin-right: 2.5rem; /* balance the hamburger so the logo stays centered */
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
 }
 .logo {
   height: 2.6rem;
