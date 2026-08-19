@@ -17,7 +17,8 @@ type Persisted = {
   to: Format
 }
 
-const REVEAL_MS = 600
+const REVEAL_MS = 600 // how long the correct/wrong colors stay lit
+const CLEAR_MS = 220 // neutral gap while the colors fade, before the next kanji
 
 export function useQuiz() {
   const blocks = ref<Block[]>([])
@@ -33,7 +34,8 @@ export function useQuiz() {
   const to = ref<Format>('meaning') // answer facet (user-toggled)
 
   const question = ref<Question | null>(null)
-  const chosenKey = ref<string | null>(null) // the square the user tapped
+  const chosenKey = ref<string | null>(null) // the square the user tapped (drives colors)
+  const locked = ref(false) // block taps through the reveal + fade, until next kanji
 
   const block = computed(() => blocks.value.find((b) => b.id === blockId.value) ?? null)
   const byChar = (c: string) => block.value?.kanji.find((k) => k.char === c) ?? null
@@ -83,7 +85,8 @@ export function useQuiz() {
   }
 
   function answer(key: string) {
-    if (chosenKey.value || !question.value) return // ignore taps after reveal
+    if (locked.value || !question.value) return // ignore taps during the reveal
+    locked.value = true
     chosenKey.value = key
     const picked = question.value.options.find((o) => o.key === key)
     const char = queue.value[0]
@@ -93,7 +96,14 @@ export function useQuiz() {
       wrong.value++
       if (char && !incorrect.value.includes(char)) incorrect.value.push(char)
     }
-    setTimeout(advance, REVEAL_MS)
+    // Show colors, then fade them off on this same question, then advance.
+    setTimeout(() => {
+      chosenKey.value = null
+      setTimeout(() => {
+        advance()
+        locked.value = false
+      }, CLEAR_MS)
+    }, REVEAL_MS)
   }
 
   function advance() {
@@ -164,6 +174,7 @@ export function useQuiz() {
     block,
     question,
     chosenKey,
+    locked,
     position,
     passTotal,
     correct,

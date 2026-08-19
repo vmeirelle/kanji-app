@@ -39,12 +39,14 @@ const progress = computed(() =>
       <div class="progress"><div class="fill" :style="{ width: progress + '%' }" /></div>
       <div class="toggles">
         <FormatToggle label="From" v-model="q.from.value" />
+        <span class="arrow">→</span>
         <FormatToggle label="To" v-model="q.to.value" />
       </div>
       <QuizView
         :prompt="q.question.value.prompt"
         :question="q.question.value"
         :chosen-key="q.chosenKey.value"
+        :disabled="q.locked.value"
         @answer="q.answer"
       />
     </section>
@@ -121,9 +123,14 @@ const progress = computed(() =>
 }
 .toggles {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
   margin-bottom: 1.5rem;
+}
+.arrow {
+  color: var(--color-text);
+  font-size: 0.8rem;
 }
 .overlay {
   position: fixed;

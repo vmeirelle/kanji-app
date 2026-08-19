@@ -3,7 +3,12 @@ import { computed } from 'vue'
 import SquareGrid, { type GridItem } from './SquareGrid.vue'
 import type { Question } from '../quiz'
 
-const props = defineProps<{ prompt: string; question: Question; chosenKey: string | null }>()
+const props = defineProps<{
+  prompt: string
+  question: Question
+  chosenKey: string | null
+  disabled?: boolean
+}>()
 const emit = defineEmits<{ answer: [key: string] }>()
 
 const items = computed<GridItem[]>(() =>
@@ -25,7 +30,7 @@ const items = computed<GridItem[]>(() =>
 <template>
   <div class="quiz">
     <div class="prompt">{{ prompt }}</div>
-    <SquareGrid :items="items" :disabled="!!chosenKey" @select="emit('answer', $event)" />
+    <SquareGrid :items="items" :disabled="disabled" @select="emit('answer', $event)" />
   </div>
 </template>
 
