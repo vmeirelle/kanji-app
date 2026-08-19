@@ -3,19 +3,18 @@ import { computed, onMounted, ref } from 'vue'
 import { useQuiz } from './useQuiz'
 import { loadRankings, addRanking, today, pointsOf, type Ranking } from './rankings'
 import { levelColor } from './data/blocks'
-import CategoryList from './components/CategoryList.vue'
-import QuizView from './components/QuizView.vue'
-import RankingView from './components/RankingView.vue'
-import SavedView from './components/SavedView.vue'
-import SettingsView from './components/SettingsView.vue'
-import NavDrawer, { type NavItem } from './components/NavDrawer.vue'
+import { FORMATS } from './quiz'
+import CategoryList from './views/CategoryList.vue'
+import QuizView from './views/QuizView.vue'
+import RankingView from './views/RankingView.vue'
+import SavedView from './views/SavedView.vue'
+import NavDrawer, { type NavItem } from './components/base/NavDrawer.vue'
 
 // The menu is data-driven — add a NavItem (and a matching branch) for new tabs.
 const NAV: NavItem[] = [
   { id: 'learn', label: 'Learn', icon: '📖' },
   { id: 'saved', label: 'Unfinished', icon: '⏸️' },
   { id: 'ranking', label: 'Ranking', icon: '🏆' },
-  { id: 'settings', label: 'Settings', icon: '⚙️' },
 ]
 
 const q = useQuiz()
@@ -155,6 +154,38 @@ function finish() {
 
         <CategoryList :blocks="q.levelBlocks.value" v-model:selected="q.selected.value" />
 
+        <div class="card">
+          <span class="tag">Show (From)</span>
+          <div class="seg">
+            <button
+              v-for="f in FORMATS"
+              :key="f.id"
+              type="button"
+              class="seg-btn"
+              :class="{ on: q.from.value === f.id }"
+              :aria-pressed="q.from.value === f.id"
+              @click="q.from.value = f.id"
+            >
+              <span class="seg-main">{{ f.label }}</span>
+            </button>
+          </div>
+
+          <span class="tag">Answer (To)</span>
+          <div class="seg">
+            <button
+              v-for="f in FORMATS"
+              :key="f.id"
+              type="button"
+              class="seg-btn"
+              :class="{ on: q.to.value === f.id }"
+              :aria-pressed="q.to.value === f.id"
+              @click="q.to.value = f.id"
+            >
+              <span class="seg-main">{{ f.label }}</span>
+            </button>
+          </div>
+        </div>
+
         <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
           Start · {{ q.roundSize.value }} kanji
         </button>
@@ -227,10 +258,7 @@ function finish() {
     />
 
     <!-- RANKING -->
-    <RankingView v-else-if="view === 'ranking'" :rankings="rankings" />
-
-    <!-- SETTINGS -->
-    <SettingsView v-else v-model:from="q.from.value" v-model:to="q.to.value" />
+    <RankingView v-else :rankings="rankings" />
     </main>
   </div>
 </template>
