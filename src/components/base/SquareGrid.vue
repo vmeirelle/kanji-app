@@ -8,7 +8,6 @@ export type GridItem = {
   key: string
   label: string
   state?: State
-  // When set (the wrong square you tapped), the square shows all three facets.
   detail?: { char: string; kana: string; meaning: string }
 }
 
@@ -16,15 +15,14 @@ defineProps<{ items: GridItem[]; disabled?: boolean }>()
 const emit = defineEmits<{ select: [key: string] }>()
 
 const theme = useTheme()
-// [border, background, text] tokens per revealed state.
 const stateColors: Record<State, [Color, Color, Color]> = {
   correct: [Color.Correct, Color.CorrectSoft, Color.Correct],
   wrong: [Color.Wrong, Color.Wrong, Color.OnBrand],
 }
 function stateStyle(item: GridItem): CSSProperties {
-  if (!item.state) return {} // default look comes from the theme vars in CSS
-  const [border, bg, text] = stateColors[item.state]
-  return { borderColor: theme.color(border), background: theme.color(bg), color: theme.color(text) }
+  if (!item.state) return {}
+  const [border, background, text] = stateColors[item.state]
+  return { borderColor: theme.color(border), background: theme.color(background), color: theme.color(text) }
 }
 </script>
 
@@ -51,10 +49,8 @@ function stateStyle(item: GridItem): CSSProperties {
 <style scoped>
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)); /* always 3×3, any width */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.75rem;
-  max-width: 34rem; /* keep squares tappable, not huge, on wide screens */
-  margin: 0 auto;
 }
 .square {
   display: flex;

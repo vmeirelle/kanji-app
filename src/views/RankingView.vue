@@ -219,10 +219,5 @@ const onEnd = (e: TouchEvent) => {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
-.hint {
-  text-align: center;
-  font-size: 0.8rem;
-  color: var(--color-text);
-  margin-top: 0.5rem;
-}
+
 </style>
