@@ -79,6 +79,7 @@ const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
   padding: 0.25rem 0.5rem;
 }
 .brand {
+  margin-left: auto; /* push the logo to the right edge */
   padding: 0 0.5rem;
   border: none;
   background: transparent;

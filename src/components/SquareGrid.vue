@@ -34,8 +34,10 @@ const emit = defineEmits<{ select: [key: string] }>()
 <style scoped>
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr)); /* always 3×3, any width */
   gap: 0.75rem;
+  max-width: 30rem; /* keep squares tappable, not huge, on wide screens */
+  margin: 0 auto;
 }
 .square {
   display: flex;
