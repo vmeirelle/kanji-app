@@ -1,6 +1,7 @@
 [
   {
     "id": "n5-nature",
+    "level": "N5",
     "name": "Nature",
     "kanji": [
       { "char": "日", "meaning": "sun / day", "kana": "にち" },
@@ -16,6 +17,7 @@
   },
   {
     "id": "n5-people",
+    "level": "N5",
     "name": "People",
     "kanji": [
       { "char": "人", "meaning": "person", "kana": "ひと" },
@@ -27,6 +29,86 @@
       { "char": "手", "meaning": "hand", "kana": "て" },
       { "char": "足", "meaning": "foot / leg", "kana": "あし" },
       { "char": "心", "meaning": "heart", "kana": "こころ" }
+    ]
+  },
+  {
+    "id": "n5-numbers",
+    "level": "N5",
+    "name": "Numbers",
+    "kanji": [
+      { "char": "一", "meaning": "one", "kana": "いち" },
+      { "char": "二", "meaning": "two", "kana": "に" },
+      { "char": "三", "meaning": "three", "kana": "さん" },
+      { "char": "四", "meaning": "four", "kana": "よん" },
+      { "char": "五", "meaning": "five", "kana": "ご" },
+      { "char": "六", "meaning": "six", "kana": "ろく" },
+      { "char": "七", "meaning": "seven", "kana": "なな" },
+      { "char": "八", "meaning": "eight", "kana": "はち" },
+      { "char": "九", "meaning": "nine", "kana": "きゅう" }
+    ]
+  },
+  {
+    "id": "n5-time",
+    "level": "N5",
+    "name": "Time",
+    "kanji": [
+      { "char": "年", "meaning": "year", "kana": "とし" },
+      { "char": "時", "meaning": "hour", "kana": "じ" },
+      { "char": "分", "meaning": "minute", "kana": "ふん" },
+      { "char": "今", "meaning": "now", "kana": "いま" },
+      { "char": "半", "meaning": "half", "kana": "はん" },
+      { "char": "毎", "meaning": "every", "kana": "まい" },
+      { "char": "何", "meaning": "what", "kana": "なに" },
+      { "char": "週", "meaning": "week", "kana": "しゅう" },
+      { "char": "曜", "meaning": "day of the week", "kana": "よう" }
+    ]
+  },
+  {
+    "id": "n4-city",
+    "level": "N4",
+    "name": "City & Places",
+    "kanji": [
+      { "char": "町", "meaning": "town", "kana": "まち" },
+      { "char": "村", "meaning": "village", "kana": "むら" },
+      { "char": "市", "meaning": "city", "kana": "し" },
+      { "char": "京", "meaning": "capital", "kana": "きょう" },
+      { "char": "都", "meaning": "metropolis", "kana": "と" },
+      { "char": "県", "meaning": "prefecture", "kana": "けん" },
+      { "char": "島", "meaning": "island", "kana": "しま" },
+      { "char": "道", "meaning": "road", "kana": "どう" },
+      { "char": "駅", "meaning": "station", "kana": "えき" }
+    ]
+  },
+  {
+    "id": "n4-actions",
+    "level": "N4",
+    "name": "Actions",
+    "kanji": [
+      { "char": "借", "meaning": "borrow", "kana": "かり" },
+      { "char": "貸", "meaning": "lend", "kana": "かし" },
+      { "char": "打", "meaning": "hit", "kana": "う" },
+      { "char": "洗", "meaning": "wash", "kana": "あら" },
+      { "char": "使", "meaning": "use", "kana": "つか" },
+      { "char": "走", "meaning": "run", "kana": "はし" },
+      { "char": "歩", "meaning": "walk", "kana": "ある" },
+      { "char": "待", "meaning": "wait", "kana": "ま" },
+      { "char": "立", "meaning": "stand", "kana": "た" }
+    ]
+  },
+  {
+    "id": "n4-nature",
+    "level": "N4",
+    "name": "Nature",
+    "kanji": [
+      { "char": "空", "meaning": "sky", "kana": "そら" },
+      { "char": "海", "meaning": "sea", "kana": "うみ" },
+      { "char": "森", "meaning": "forest", "kana": "もり" },
+      { "char": "林", "meaning": "woods", "kana": "はやし" },
+      { "char": "池", "meaning": "pond", "kana": "いけ" },
+      { "char": "岩", "meaning": "rock", "kana": "いわ" },
+      { "char": "石", "meaning": "stone", "kana": "いし" },
+      { "char": "雲", "meaning": "cloud", "kana": "くも" },
+      { "char": "星", "meaning": "star", "kana": "ほし" }
     ]
   }
 ]

@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useQuiz } from './useQuiz'
 import { loadRankings, addRanking, type Ranking } from './rankings'
-import SquareGrid, { type GridItem } from './components/SquareGrid.vue'
+import CategoryList from './components/CategoryList.vue'
 import QuizView from './components/QuizView.vue'
 import RankingView from './components/RankingView.vue'
 import SettingsView from './components/SettingsView.vue'
@@ -27,9 +27,6 @@ onMounted(() => {
   rankings.value = loadRankings()
 })
 
-const blockItems = computed<GridItem[]>(() =>
-  q.blocks.value.map((b) => ({ key: b.id, label: b.name })),
-)
 // Fill fraction for the progress bar (current question / pass size).
 const progress = computed(() =>
   q.passTotal.value ? (q.position.value / q.passTotal.value) * 100 : 0,
@@ -41,11 +38,11 @@ function go(id: string) {
 }
 
 function saveScore() {
-  if (!name.value.trim() || saved.value || !q.block.value) return
+  if (!name.value.trim() || saved.value || !q.selected.value.length) return
   rankings.value = addRanking({
     name: name.value.trim(),
-    blockId: q.block.value.id,
-    blockName: q.blockName.value,
+    blockId: q.selectionId.value,
+    blockName: q.selectionName.value,
     pct: q.pct.value,
     date: new Date().toISOString(),
   })
@@ -76,14 +73,18 @@ function finish() {
 
     <!-- LEARN -->
     <template v-if="view === 'learn'">
-      <!-- Pick a block (the only setup tap) -->
-      <section v-if="q.phase.value === 'block'">
-        <SquareGrid :items="blockItems" @select="q.selectBlock" />
+      <!-- Pick categories, by level. Remembered, so it is one tap next time. -->
+      <section v-if="q.phase.value === 'ready'" class="pick">
+        <CategoryList :blocks="q.blocks.value" v-model:selected="q.selected.value" />
+        <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
+          Start · {{ q.poolSize.value }} kanji
+        </button>
       </section>
 
       <!-- Answer questions -->
       <section v-else-if="q.phase.value === 'question' && q.question.value">
         <div class="bar">
+          <button class="stop" @click="finish">✕ Stop</button>
           <span>{{ q.position.value }}/{{ q.passTotal.value }}</span>
           <span class="tally">
             <span class="ok">✓ {{ q.correct.value }}</span>
@@ -103,9 +104,9 @@ function finish() {
       <!-- End-of-pass popup -->
       <div v-else class="overlay">
         <div class="modal">
-          <p class="lead">Block complete 🎉</p>
+          <p class="lead">Round complete 🎉</p>
           <p class="score">{{ q.pct.value }}%</p>
-          <p class="hint">First-try score on {{ q.blockName.value }}</p>
+          <p class="hint">First-try score on {{ q.selectionName.value }}</p>
 
           <button v-if="q.canRetry.value" class="btn" @click="q.retryIncorrect">
             Retry incorrect ({{ q.incorrectCount.value }})
@@ -169,6 +170,11 @@ function finish() {
   color: var(--color-heading);
   margin-right: 2.5rem; /* balance the hamburger so the title stays centered */
 }
+.pick {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 .lead {
   text-align: center;
   font-size: 1.25rem;
@@ -184,6 +190,14 @@ function finish() {
 .tally {
   display: flex;
   gap: 0.75rem;
+}
+.stop {
+  border: none;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 0.85rem;
+  padding: 0.25rem 0.25rem 0.25rem 0;
+  cursor: pointer;
 }
 .ok {
   color: #16a34a;
