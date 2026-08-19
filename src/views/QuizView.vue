@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 import SquareGrid, { type GridItem } from '../components/base/SquareGrid.vue'
 import { useSpeech } from '../composables/useSpeech'
-import type { Question } from '../quiz'
+import { useSettings } from '../composables/useSettings'
+import { scriptOf, type Question } from '../quiz'
 
 const { supported, speak } = useSpeech()
+const settings = useSettings()
 
 const props = defineProps<{
   prompt: string
@@ -19,6 +21,20 @@ const verdict = computed(() => {
   if (!props.chosenKey) return null
   return props.question.options.find((o) => o.key === props.chosenKey)?.correct ? 'ok' : 'no'
 })
+
+const promptScript = computed(() => scriptOf(props.prompt))
+
+// Auto-play the reading on reveal, per the setting (never / on miss / always).
+watch(
+  () => props.chosenKey,
+  (key, prev) => {
+    if (!key || prev) return
+    const mode = settings.autoSound
+    if (mode === 'all' || (mode === 'fail' && verdict.value === 'no')) {
+      speak(props.question.target.kana)
+    }
+  },
+)
 
 const items = computed<GridItem[]>(() =>
   props.question.options.map((o) => {
@@ -45,7 +61,12 @@ const items = computed<GridItem[]>(() =>
           >
             {{ countdown }}s
           </span>
-          <div class="glyph">{{ prompt }}</div>
+          <div
+            class="glyph"
+            :class="{ en: promptScript === 'latin', kana: promptScript === 'kana' }"
+          >
+            {{ prompt }}
+          </div>
         </div>
         <div class="face back" :class="verdict">
           <!-- Only render while answered, so the flip-back to the next question
@@ -62,7 +83,7 @@ const items = computed<GridItem[]>(() =>
             </button>
             <div v-else class="glyph small">{{ question.target.char }}</div>
             <dl class="info">
-              <div>
+              <div class="reading">
                 <dt>Reading</dt>
                 <dd>
                   <button
@@ -179,6 +200,18 @@ const items = computed<GridItem[]>(() =>
 }
 .glyph.small {
   font-size: clamp(3rem, 16vw, 4.5rem);
+}
+.glyph.kana {
+  font-family: var(--font-kana);
+}
+/* English prompts: normal font, much smaller so long words fit. */
+.glyph.en {
+  font-family: inherit;
+  font-size: clamp(1.5rem, 7vw, 2.6rem);
+  font-weight: 700;
+}
+.reading dd {
+  font-family: var(--font-kana);
 }
 .say {
   border: none;

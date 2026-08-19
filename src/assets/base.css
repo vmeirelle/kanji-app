@@ -52,8 +52,10 @@
 
   --sidebar: 13rem;
 
-  /* Textbook (kyokasho) style for the large kanji glyphs learners study. */
+  /* Textbook (kyokasho) style for the large kanji glyphs learners study.
+     --font-kana can be switched off separately via settings. */
   --font-kanji: 'Klee One', 'Noto Serif JP', serif;
+  --font-kana: 'Klee One', 'Noto Serif JP', serif;
 
   /* Mascot palette: sumi ink, cream paper, pink blush. */
   --ink: #2a2a2e;
@@ -64,8 +66,9 @@
   --section-gap: 160px;
 }
 
+/* Dark values, shared by system-dark (no explicit theme) and forced dark. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme]) {
     --lv-N5: #6ba6cf;
     --lv-N4: #5fb890;
     --lv-N3: #e6b855;
@@ -74,21 +77,53 @@
     --color-background: var(--vt-c-black);
     --color-background-soft: var(--vt-c-black-soft);
     --color-background-mute: var(--vt-c-black-mute);
-
     --color-border: var(--vt-c-divider-dark-2);
     --color-border-hover: var(--vt-c-divider-dark-1);
-
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
-
-
     --brand: #2a2a2e;
-
     --ok: #8ecaa0;
     --ok-soft: #8ecaa030;
     --danger: #ec949a;
     --danger-soft: #ec949a30;
   }
+}
+:root[data-theme='dark'] {
+  --lv-N5: #6ba6cf;
+  --lv-N4: #5fb890;
+  --lv-N3: #e6b855;
+  --lv-N2: #ec8759;
+  --lv-N1: #d76578;
+  --color-background: var(--vt-c-black);
+  --color-background-soft: var(--vt-c-black-soft);
+  --color-background-mute: var(--vt-c-black-mute);
+  --color-border: var(--vt-c-divider-dark-2);
+  --color-border-hover: var(--vt-c-divider-dark-1);
+  --color-heading: var(--vt-c-text-dark-1);
+  --color-text: var(--vt-c-text-dark-2);
+  --brand: #2a2a2e;
+  --ok: #8ecaa0;
+  --ok-soft: #8ecaa030;
+  --danger: #ec949a;
+  --danger-soft: #ec949a30;
+}
+
+/* Accessibility: collapse all JLPT level accents to one neutral brand colour. */
+:root.no-lv {
+  --lv-N5: var(--brand);
+  --lv-N4: var(--brand);
+  --lv-N3: var(--brand);
+  --lv-N2: var(--brand);
+  --lv-N1: var(--brand);
+}
+
+/* Accessibility: kill motion (transitions, animations, smooth scroll). */
+:root.no-motion *,
+:root.no-motion *::before,
+:root.no-motion *::after {
+  transition-duration: 0.001ms !important;
+  animation-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
 }
 
 *,

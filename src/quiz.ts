@@ -23,6 +23,16 @@ export type Question = { prompt: string; target: Facets; options: Option[] }
 
 const facetsOf = (k: Kanji): Facets => ({ char: k.char, kana: k.kana, meaning: k.meaning })
 
+// Classify a label so it can be styled: kanji/kana use a Japanese font & large
+// size; latin (English) uses the normal font & a smaller size.
+export type Script = 'kanji' | 'kana' | 'latin'
+export const scriptOf = (s: string): Script => {
+  if (/[一-鿿]/.test(s)) return 'kanji'
+  if (/[぀-ヿ]/.test(s)) return 'kana'
+  return 'latin'
+}
+export const isJapanese = (s: string): boolean => scriptOf(s) !== 'latin'
+
 export function shuffle<T>(xs: T[]): T[] {
   const a = [...xs]
   for (let i = a.length - 1; i > 0; i--) {

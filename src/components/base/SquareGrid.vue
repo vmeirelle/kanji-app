@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CSSProperties } from 'vue'
 import { useTheme, Color } from '../../composables/useTheme'
+import { scriptOf } from '../../quiz'
 
 type State = 'correct' | 'wrong'
 
@@ -32,6 +33,7 @@ function stateStyle(item: GridItem): CSSProperties {
       v-for="item in items"
       :key="item.key"
       class="square"
+      :class="scriptOf(item.label)"
       :style="stateStyle(item)"
       :disabled="disabled"
       @click="emit('select', item.key)"
@@ -62,7 +64,7 @@ function stateStyle(item: GridItem): CSSProperties {
   border-radius: 0.9rem;
   background: var(--color-background-soft);
   color: var(--color-heading);
-  font-size: clamp(1.1rem, 5vw, 1.6rem);
+  font-size: clamp(0.95rem, 4vw, 1.35rem);
   line-height: 1.2;
   text-align: center;
   cursor: pointer;
@@ -71,6 +73,18 @@ function stateStyle(item: GridItem): CSSProperties {
 }
 .square:active:not(:disabled) {
   transform: scale(0.96);
+}
+/* Kanji/kana options: Japanese font, a touch larger. */
+.square.kanji {
+  font-family: var(--font-kanji);
+  font-size: clamp(1.3rem, 6vw, 1.9rem);
+}
+.square.kana {
+  font-family: var(--font-kana);
+  font-size: clamp(1.3rem, 6vw, 1.9rem);
+}
+.d-char {
+  font-family: var(--font-kanji);
 }
 .square:disabled {
   cursor: default;

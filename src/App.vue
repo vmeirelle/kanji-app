@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useQuiz } from './composables/useQuiz'
 import { useRankings } from './composables/useRankings'
+import { useSettings } from './composables/useSettings'
 import { useBreakpoint } from './composables/useBreakpoint'
 import AppBrand from './components/base/AppBrand.vue'
 import KanjiBadge from './components/base/KanjiBadge.vue'
@@ -9,6 +10,7 @@ import FadeTransition from './components/base/FadeTransition.vue'
 import LearnView from './views/LearnView.vue'
 import RankingView from './views/RankingView.vue'
 import SavedView from './views/SavedView.vue'
+import SettingsView from './views/SettingsView.vue'
 import NotFound from './views/NotFound.vue'
 import NavDrawer, { type NavItem } from './components/base/NavDrawer.vue'
 import BaseText from './components/base/BaseText.vue'
@@ -18,10 +20,12 @@ const NAV: NavItem[] = [
   { id: 'learn', label: 'Learn', kanji: '学' },
   { id: 'saved', label: 'Unfinished', kanji: '未' },
   { id: 'ranking', label: 'Ranking', kanji: '位' },
+  { id: 'settings', label: 'Settings', kanji: '設' },
 ]
 
 const q = useQuiz()
 const { rankings } = useRankings()
+useSettings()
 const { isDesktop } = useBreakpoint()
 const view = ref('learn')
 const menuOpen = ref(false)
@@ -97,6 +101,8 @@ function resumeLesson(id: string) {
         />
 
         <RankingView v-else-if="view === 'ranking'" :rankings="rankings" :levels="q.levels.value" />
+
+        <SettingsView v-else-if="view === 'settings'" />
 
         <NotFound v-else />
       </FadeTransition>
