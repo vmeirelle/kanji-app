@@ -82,7 +82,7 @@ function finish() {
 
 <template>
   <div class="shell">
-    
+
     <aside class="side">
       <button class="side-brand" aria-label="Home" @click="goHome">
         <img class="logo" src="/logo.png" alt="Kanji Quiz" />
@@ -118,9 +118,9 @@ function finish() {
       @close="menuOpen = false"
     />
 
-    
+
     <template v-if="view === 'learn'">
-      
+
       <section v-if="q.phase.value === 'ready'" class="pick">
         <div class="card">
           <span class="tag">Game</span>
@@ -230,7 +230,7 @@ function finish() {
         </button>
       </section>
 
-      
+
       <section v-else-if="q.phase.value === 'question' && q.question.value">
         <div class="bar">
           <button class="stop" @click="finish">✕ Stop</button>
@@ -250,13 +250,13 @@ function finish() {
           :countdown="q.mode.value === 'ranked' ? q.secondsLeft.value : null"
           @answer="q.answer"
         />
-        
+
         <div v-if="q.answered.value" class="tap-next" @click="q.next">
           <span class="tap-hint">Tap anywhere for next</span>
         </div>
       </section>
 
-      
+
       <div v-else class="overlay">
         <div class="modal">
           <img class="modal-sticker" :src="resultSticker" alt="" />
@@ -293,7 +293,7 @@ function finish() {
       </div>
     </template>
 
-    
+
     <SavedView
       v-else-if="view === 'saved'"
       :lessons="q.savedLessons.value"
@@ -301,7 +301,7 @@ function finish() {
       @drop="q.drop"
     />
 
-    
+
     <RankingView v-else-if="view === 'ranking'" :rankings="rankings" :levels="q.levels.value" />
 
     <NotFound v-else />
@@ -320,7 +320,7 @@ function finish() {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  min-height: 100vh; 
+  min-height: 100vh;
 }
 .top {
   display: flex;
@@ -337,7 +337,7 @@ function finish() {
   padding: 0.25rem 0.5rem;
 }
 .brand {
-  margin-left: auto; 
+  margin-left: auto;
   display: flex;
   border: none;
   background: transparent;
@@ -349,7 +349,7 @@ function finish() {
   border-radius: 0.5rem;
 }
 .side {
-  display: none; 
+  display: none;
 }
 .side-brand {
   border: none;
@@ -386,7 +386,7 @@ function finish() {
 }
 
 @media (min-width: 48rem) {
-  
+
   .shell {
     display: grid;
     grid-template-columns: 13rem minmax(0, 1fr);
@@ -403,7 +403,7 @@ function finish() {
     min-height: 100vh;
   }
   .top {
-    display: none; 
+    display: none;
   }
   .app {
     max-width: 34rem;
@@ -415,7 +415,7 @@ function finish() {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  flex: 1; 
+  flex: 1;
 }
 
 .pick > .btn.primary {
@@ -498,6 +498,9 @@ function finish() {
 .seg-btn.on:disabled {
   opacity: 1;
   cursor: default;
+  background: var(--color-background-mute);
+  color: var(--color-text);
+  font-weight: 600;
 }
 .lead {
   text-align: center;

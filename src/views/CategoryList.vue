@@ -130,7 +130,7 @@ function toggleGroup(blocks: Block[]) {
   font-size: 0.75rem;
   line-height: 1.15;
   text-align: center;
-  
+
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
@@ -146,6 +146,16 @@ function toggleGroup(blocks: Block[]) {
   border-color: var(--lv);
   background: var(--lv);
   color: #fff;
+}
+.groups.locked .lv,
+.groups.locked .count {
+  color: var(--color-text);
+}
+.groups.locked .tile,
+.groups.locked .tile.on {
+  border-color: var(--color-border);
+  background: var(--color-background-mute);
+  color: var(--color-text);
 }
 @media (hover: hover) {
   .tile:hover:not(.on) {
