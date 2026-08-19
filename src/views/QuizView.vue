@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import SquareGrid, { type GridItem } from '../components/base/SquareGrid.vue'
+import { useSpeech } from '../composables/useSpeech'
 import type { Question } from '../quiz'
+
+const { supported, speak } = useSpeech()
 
 const props = defineProps<{
   prompt: string
@@ -31,8 +34,8 @@ const items = computed<GridItem[]>(() =>
 
 <template>
   <div class="quiz">
-    
-    <div class="stage">
+
+    <div class="stage" :class="{ raised: chosenKey }">
       <div class="card" :class="{ flipped: chosenKey }">
         <div class="face front">
           <span
@@ -45,9 +48,33 @@ const items = computed<GridItem[]>(() =>
           <div class="glyph">{{ prompt }}</div>
         </div>
         <div class="face back" :class="verdict">
-          <div class="glyph small">{{ question.target.char }}</div>
+          <button
+            v-if="supported"
+            type="button"
+            class="say glyph small"
+            aria-label="Play pronunciation"
+            @click.stop="speak(question.target.kana)"
+          >
+            {{ question.target.char }}
+          </button>
+          <div v-else class="glyph small">{{ question.target.char }}</div>
           <dl class="info">
-            <div><dt>Reading</dt><dd>{{ question.target.kana }}</dd></div>
+            <div>
+              <dt>Reading</dt>
+              <dd>
+                <button
+                  v-if="supported"
+                  type="button"
+                  class="say-word"
+                  aria-label="Play pronunciation"
+                  @click.stop="speak(question.target.kana)"
+                >
+                  {{ question.target.kana }}
+                  <span class="say-icon">🔊</span>
+                </button>
+                <template v-else>{{ question.target.kana }}</template>
+              </dd>
+            </div>
             <div><dt>Meaning</dt><dd>{{ question.target.meaning }}</dd></div>
           </dl>
         </div>
@@ -83,7 +110,7 @@ const items = computed<GridItem[]>(() =>
   border-radius: 1rem;
   background: var(--color-background-soft);
   backface-visibility: hidden;
-  
+
   transition:
     transform 0.28s ease-out,
     opacity 0s linear 0.14s;
@@ -133,8 +160,13 @@ const items = computed<GridItem[]>(() =>
   background: var(--danger-soft);
   color: var(--danger);
 }
+.stage.raised {
+  position: relative;
+  z-index: 6;
+}
 .glyph {
   min-width: 0;
+  font-family: var(--font-kanji);
   font-size: clamp(4rem, 22vw, 6.5rem);
   line-height: 1;
   text-align: center;
@@ -143,6 +175,28 @@ const items = computed<GridItem[]>(() =>
 }
 .glyph.small {
   font-size: clamp(3rem, 16vw, 4.5rem);
+}
+.say {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+.say-word {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  padding: 0;
+}
+.say-icon {
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.7;
 }
 .info {
   display: flex;
@@ -165,6 +219,9 @@ const items = computed<GridItem[]>(() =>
   color: var(--color-text);
 }
 .info dd {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 1.1rem;
   color: var(--color-heading);
 }

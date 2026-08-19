@@ -51,6 +51,9 @@
 
   --sidebar: 13rem;
 
+  /* Textbook (kyokasho) style for the large kanji glyphs learners study. */
+  --font-kanji: 'Klee One', 'Noto Serif JP', serif;
+
   --section-gap: 160px;
 }
 
@@ -98,16 +101,12 @@ body {
     background-color 0.5s;
   line-height: 1.6;
   font-family:
+    'Noto Sans JP',
     Inter,
     -apple-system,
     BlinkMacSystemFont,
     'Segoe UI',
     Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Fira Sans',
-    'Droid Sans',
     'Helvetica Neue',
     sans-serif;
   font-size: 15px;
