@@ -46,8 +46,8 @@ export function useQuiz() {
   const to = ref<Format>('meaning') // answer facet (user-toggled)
 
   const question = ref<Question | null>(null)
-  const chosenKey = ref<string | null>(null) // the square the user tapped (drives colors)
-  const locked = ref(false) // block taps through the reveal + fade, until next kanji
+  const chosenKey = ref<string | null>(null) // the square the user tapped (null until answered)
+  const answered = computed(() => chosenKey.value !== null)
 
   // Every selected category pooled together: the pass, and the distractors.
   const pool = computed(() => poolOf(blocks.value, selected.value))
@@ -124,8 +124,7 @@ export function useQuiz() {
   }
 
   function answer(key: string) {
-    if (locked.value || !question.value) return // ignore taps during the reveal
-    locked.value = true
+    if (answered.value || !question.value) return // one answer per question
     chosenKey.value = key
     const picked = question.value.options.find((o) => o.key === key)
     const char = queue.value[0]
@@ -135,14 +134,12 @@ export function useQuiz() {
       wrong.value++
       if (char && !incorrect.value.includes(char)) incorrect.value.push(char)
     }
-    // Show colors, then fade them off on this same question, then advance.
-    setTimeout(() => {
-      chosenKey.value = null
-      setTimeout(() => {
-        advance()
-        locked.value = false
-      }, CLEAR_MS)
-    }, REVEAL_MS)
+    // No auto-advance: the reveal stays until the user taps to continue (next()).
+  }
+
+  /** Advance to the next kanji — triggered by the user tapping after a reveal. */
+  function next() {
+    if (answered.value) advance()
   }
 
   function advance() {
@@ -226,7 +223,7 @@ export function useQuiz() {
     selectionId,
     question,
     chosenKey,
-    locked,
+    answered,
     position,
     passTotal,
     correct,
@@ -239,6 +236,7 @@ export function useQuiz() {
     start,
     startPass,
     answer,
+    next,
     retryIncorrect,
     restart,
   }

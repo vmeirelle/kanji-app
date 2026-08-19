@@ -33,6 +33,10 @@
   --color-heading: var(--vt-c-text-light-1);
   --color-text: var(--vt-c-text-light-1);
 
+  /* Brand palette derived from the app logo (navy card + blue brush accent). */
+  --brand: #345b9c;
+  --brand-navy: #1e2c4d;
+
   --section-gap: 160px;
 }
 
@@ -47,6 +51,9 @@
 
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
+
+    /* Lighter brush-blue for contrast on dark backgrounds. */
+    --brand: #6d97d6;
   }
 }
 

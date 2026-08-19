@@ -1,5 +1,11 @@
 <script setup lang="ts">
-export type GridItem = { key: string; label: string; state?: 'correct' | 'wrong' }
+export type GridItem = {
+  key: string
+  label: string
+  state?: 'correct' | 'wrong'
+  // When set (the wrong square you tapped), the square shows all three facets.
+  detail?: { char: string; kana: string; meaning: string }
+}
 
 defineProps<{ items: GridItem[]; disabled?: boolean }>()
 const emit = defineEmits<{ select: [key: string] }>()
@@ -15,7 +21,12 @@ const emit = defineEmits<{ select: [key: string] }>()
       :disabled="disabled"
       @click="emit('select', item.key)"
     >
-      {{ item.label }}
+      <span v-if="item.detail" class="detail">
+        <span class="d-char">{{ item.detail.char }}</span>
+        <span class="d-sub">{{ item.detail.kana }}</span>
+        <span class="d-sub">{{ item.detail.meaning }}</span>
+      </span>
+      <template v-else>{{ item.label }}</template>
     </button>
   </div>
 </template>
@@ -55,8 +66,21 @@ const emit = defineEmits<{ select: [key: string] }>()
 }
 .square.wrong {
   border-color: #dc2626;
-  background: #dc262622;
-  color: #dc2626;
+  background: #dc2626;
+  color: #fff;
+}
+.detail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  line-height: 1.15;
+}
+.d-char {
+  font-size: clamp(1.3rem, 6vw, 1.9rem);
+}
+.d-sub {
+  font-size: clamp(0.7rem, 3vw, 0.85rem);
 }
 @media (hover: hover) {
   .square:not(:disabled):hover {

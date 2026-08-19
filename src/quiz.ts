@@ -21,8 +21,12 @@ export const modeOf = (prompt: Format, answer: Format): Mode => ({
   answer,
 })
 
-export type Option = { key: string; label: string; correct: boolean }
-export type Question = { prompt: string; options: Option[] }
+/** All three renderings of a kanji, for the reveal cards. */
+export type Facets = { char: string; kana: string; meaning: string }
+export type Option = { key: string; label: string; correct: boolean; facets: Facets }
+export type Question = { prompt: string; target: Facets; options: Option[] }
+
+const facetsOf = (k: Kanji): Facets => ({ char: k.char, kana: k.kana, meaning: k.meaning })
 
 export function shuffle<T>(xs: T[]): T[] {
   const a = [...xs]
@@ -59,6 +63,7 @@ export function buildQuestion(
     key: k.char,
     label: label(k),
     correct: k === target,
+    facets: facetsOf(k),
   }))
-  return { prompt: target[mode.prompt], options }
+  return { prompt: target[mode.prompt], target: facetsOf(target), options }
 }

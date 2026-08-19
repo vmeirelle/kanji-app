@@ -62,7 +62,7 @@ function finish() {
   <main class="app">
     <header class="top">
       <button class="ham" aria-label="Menu" @click="menuOpen = !menuOpen">☰</button>
-      <h1 class="title">漢字</h1>
+      <div class="brand"><img class="logo" src="/logo.png" alt="Kanji Quiz" /></div>
     </header>
 
     <NavDrawer
@@ -98,9 +98,13 @@ function finish() {
           :prompt="q.question.value.prompt"
           :question="q.question.value"
           :chosen-key="q.chosenKey.value"
-          :disabled="q.locked.value"
+          :disabled="q.answered.value"
           @answer="q.answer"
         />
+        <!-- After answering, a tap anywhere goes to the next kanji. -->
+        <div v-if="q.answered.value" class="tap-next" @click="q.next">
+          <span class="tap-hint">Tap anywhere for next</span>
+        </div>
       </section>
 
       <!-- End-of-pass popup -->
@@ -165,12 +169,15 @@ function finish() {
   cursor: pointer;
   padding: 0.25rem 0.5rem;
 }
-.title {
+.brand {
   flex: 1;
-  font-size: 1.5rem;
-  text-align: center;
-  color: var(--color-heading);
-  margin-right: 2.5rem; /* balance the hamburger so the title stays centered */
+  display: flex;
+  justify-content: center;
+  margin-right: 2.5rem; /* balance the hamburger so the logo stays centered */
+}
+.logo {
+  height: 2.6rem;
+  border-radius: 0.5rem;
 }
 .pick {
   display: flex;
@@ -216,9 +223,26 @@ function finish() {
 }
 .fill {
   height: 100%;
-  background: #16a34a;
+  background: var(--brand);
   border-radius: 999px;
   transition: width 0.25s ease;
+}
+.tap-next {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 1.5rem;
+}
+.tap-hint {
+  color: var(--color-text);
+  font-size: 0.85rem;
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
 }
 .overlay {
   position: fixed;
@@ -253,7 +277,7 @@ function finish() {
   margin-bottom: 0.25rem;
 }
 .saved {
-  color: #16a34a;
+  color: var(--brand);
   font-weight: 600;
 }
 .input {
