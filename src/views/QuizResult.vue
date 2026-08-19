@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useQuiz } from '../composables/useQuiz'
+import type { Quiz } from '../composables/useQuiz'
 import { useRankings } from '../composables/useRankings'
 import { today } from '../rankings'
 import { Size, Color, Align, Variant } from '../composables/useTheme'
@@ -8,7 +8,8 @@ import BaseImage from '../components/base/BaseImage.vue'
 import BaseText from '../components/base/BaseText.vue'
 import BaseButton from '../components/base/BaseButton.vue'
 
-const q = useQuiz()
+const props = defineProps<{ quiz: Quiz }>()
+const q = props.quiz
 const { save } = useRankings()
 
 const name = ref('')

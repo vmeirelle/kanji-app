@@ -42,6 +42,10 @@
   --lv-N3: #d1a23c;
   --lv-N2: #db6f3f;
   --lv-N1: #c04a5c;
+  /* Basics scripts. */
+  --lv-Hiragana: #4a86b3;
+  --lv-Katakana: #db6f3f;
+  --lv-Both: #4f9d78;
 
 
   --ok: #7bb891;
@@ -73,6 +77,9 @@
     --lv-N3: #e8bd5e;
     --lv-N2: #ef8b5c;
     --lv-N1: #dd6a7c;
+    --lv-Hiragana: #6ea9cf;
+    --lv-Katakana: #ef8b5c;
+    --lv-Both: #63bd93;
     --color-background: #555555;
     --color-background-soft: #555555;
     --color-background-mute: #555555;
@@ -116,6 +123,9 @@
   --lv-N3: var(--brand);
   --lv-N2: var(--brand);
   --lv-N1: var(--brand);
+  --lv-Hiragana: var(--brand);
+  --lv-Katakana: var(--brand);
+  --lv-Both: var(--brand);
 }
 
 /* Accessibility: kill motion (transitions, animations, smooth scroll). */

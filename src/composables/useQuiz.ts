@@ -1,30 +1,33 @@
 import { ref, computed, watch } from 'vue'
 import { blocksIn, levelsOf, loadBlocks, poolOf, type Block } from '../data/blocks'
+import { loadKana } from '../data/kana'
 import { modeOf, buildQuestion, shuffle, type Format, type Question } from '../quiz'
 import * as storage from '../storage'
 import { dropSaved, loadSaved, putSaved, type Round, type SavedLesson } from '../saved'
 
 type Phase = 'ready' | 'question' | 'done'
 type Mode = 'custom' | 'ranked'
+export type Deck = 'kanji' | 'basics'
 
 type Persisted = Round & { from: Format; to: Format; mode: Mode }
 
-const KEY = 'kanji-quiz-state.v7'
-const SIZES = [5, 10, 20, 50, 100]
-const DEFAULT_SIZE = 20
+// A size of 0 means "all" (the whole selected pool).
+type QuizOpts = { deck: Deck; key: string; load: () => Promise<Block[]>; sizes: number[]; defaultSize: number }
+
 const RANKED_SIZE = 20
 const TIMER_MS = 15000
 const TICK_MS = 100
 // Sentinel chosenKey used when the per-word timer runs out with no answer.
 const TIMEOUT_KEY = '__timeout__'
 
-function createQuiz() {
+function createQuiz(opts: QuizOpts) {
+  const DEFAULT_SIZE = opts.defaultSize
   const blocks = ref<Block[]>([])
   const phase = ref<Phase>('ready')
   const mode = ref<Mode>('custom')
   const chosenLevels = ref<string[]>([])
   const selected = ref<string[]>([])
-  const size = ref(DEFAULT_SIZE)
+  const size = ref(opts.defaultSize)
   const savedLessons = ref<SavedLesson[]>([])
   const roundId = ref('')
   const queue = ref<string[]>([])
@@ -78,22 +81,27 @@ function createQuiz() {
   const pool = computed(() => poolOf(blocks.value, selected.value))
   const poolSize = computed(() => pool.value.length)
 
-  const sizeOptions = computed(() => SIZES)
+  const sizeOptions = computed(() => opts.sizes)
 
-  const sizeLocked = (n: number) => n > poolSize.value && n !== SIZES[0]
+  // "All" (0) is always selectable; a numeric size locks only if it exceeds the pool.
+  const sizeLocked = (n: number) => n !== 0 && n > poolSize.value && n !== opts.sizes[0]
 
   const maxSize = computed(() => {
-    const fits = SIZES.filter((n) => n <= poolSize.value)
-    return fits.length ? fits[fits.length - 1]! : SIZES[0]!
+    const fits = opts.sizes.filter((n) => n > 0 && n <= poolSize.value)
+    return fits.length ? fits[fits.length - 1]! : opts.sizes[0]!
   })
 
-  const activeSize = computed(() =>
-    (size.value || DEFAULT_SIZE) <= poolSize.value ? size.value || DEFAULT_SIZE : maxSize.value,
-  )
+  const activeSize = computed(() => {
+    const s = size.value
+    if (s === 0) return 0
+    return s <= poolSize.value ? s : maxSize.value
+  })
 
-  const roundSize = computed(() =>
-    Math.min(mode.value === 'ranked' ? RANKED_SIZE : activeSize.value, poolSize.value),
-  )
+  const roundSize = computed(() => {
+    if (mode.value === 'ranked') return Math.min(RANKED_SIZE, poolSize.value)
+    const a = activeSize.value
+    return a === 0 ? poolSize.value : Math.min(a, poolSize.value)
+  })
   const byChar = (c: string) => pool.value.find((k) => k.char === c) ?? null
   const chosenBlocks = computed(() => blocks.value.filter((b) => selected.value.includes(b.id)))
 
@@ -132,7 +140,7 @@ function createQuiz() {
   function applyRound(r: Round) {
     chosenLevels.value = r.levels.slice(0, 1)
     selected.value = r.selected
-    size.value = r.size || DEFAULT_SIZE
+    size.value = r.size ?? DEFAULT_SIZE
     queue.value = r.queue
     passTotal.value = r.passTotal || r.queue.length
     incorrect.value = r.incorrect ?? []
@@ -176,9 +184,9 @@ function createQuiz() {
   }
 
   async function start() {
-    blocks.value = await loadBlocks()
-    savedLessons.value = loadSaved()
-    const saved = storage.load<Persisted>(KEY)
+    blocks.value = await opts.load()
+    savedLessons.value = opts.deck === 'kanji' ? loadSaved() : []
+    const saved = storage.load<Persisted>(opts.key)
 
     chosenLevels.value = (saved?.levels ?? [])
       .filter((l) => levels.value.includes(l))
@@ -187,7 +195,7 @@ function createQuiz() {
     selected.value = (saved?.selected ?? []).filter((id) =>
       levelBlocks.value.some((b) => b.id === id),
     )
-    size.value = saved?.size || DEFAULT_SIZE
+    size.value = saved?.size ?? DEFAULT_SIZE
     if (!saved) {
       selected.value = levelBlocks.value.map((b) => b.id)
       return
@@ -309,8 +317,8 @@ function createQuiz() {
 
   function restart() {
     stopTimer()
-    // Only custom rounds can be paused/resumed; ranked runs are discarded.
-    if (queue.value.length && mode.value === 'custom') {
+    // Only custom kanji rounds can be paused/resumed; ranked & basics are discarded.
+    if (queue.value.length && mode.value === 'custom' && opts.deck === 'kanji') {
       savedLessons.value = putSaved(savedLessons.value, {
         ...roundOf(),
         id: roundId.value || String(Date.now()),
@@ -340,12 +348,13 @@ function createQuiz() {
   watch(
     [mode, chosenLevels, selected, size, queue, passTotal, incorrect, correct, wrong, from, to, scored, hasRetried],
     () => {
-      storage.save<Persisted>(KEY, { ...roundOf(), from: from.value, to: to.value, mode: mode.value })
+      storage.save<Persisted>(opts.key, { ...roundOf(), from: from.value, to: to.value, mode: mode.value })
     },
     { deep: true },
   )
 
   return {
+    deck: opts.deck,
     blocks,
     phase,
     mode,
@@ -391,10 +400,29 @@ function createQuiz() {
   }
 }
 
-// Single shared quiz instance so every view (config, play, result) reads and
-// writes the same state without prop-drilling.
-let instance: ReturnType<typeof createQuiz> | null = null
+export type Quiz = ReturnType<typeof createQuiz>
 
-export function useQuiz() {
-  return (instance ??= createQuiz())
+// One shared instance per deck so every view reads and writes the same state.
+let kanji: Quiz | null = null
+let basics: Quiz | null = null
+
+export function useQuiz(): Quiz {
+  return (kanji ??= createQuiz({
+    deck: 'kanji',
+    key: 'kanji-quiz-state.v7',
+    load: loadBlocks,
+    sizes: [5, 10, 20, 50, 100],
+    defaultSize: 20,
+  }))
+}
+
+export function useBasics(): Quiz {
+  return (basics ??= createQuiz({
+    deck: 'basics',
+    key: 'kana-quiz-state.v1',
+    load: loadKana,
+    // 0 = "All"; always selectable.
+    sizes: [5, 10, 20, 0],
+    defaultSize: 20,
+  }))
 }

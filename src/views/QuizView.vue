@@ -3,7 +3,7 @@ import { computed, watch } from 'vue'
 import SquareGrid, { type GridItem } from '../components/base/SquareGrid.vue'
 import { useSpeech } from '../composables/useSpeech'
 import { useSettings } from '../composables/useSettings'
-import { scriptOf, type Question } from '../quiz'
+import { isJapanese, scriptOf, type Question } from '../quiz'
 
 const { supported, speak } = useSpeech()
 const settings = useSettings()
@@ -24,6 +24,14 @@ const verdict = computed(() => {
 
 const promptScript = computed(() => scriptOf(props.prompt))
 
+// Speak the Japanese-script text so TTS says the syllable, not romaji letters.
+const sayText = computed(() => {
+  const t = props.question.target
+  return isJapanese(t.kana) ? t.kana : t.char
+})
+// Basics rows repeat the reading as the meaning — hide the duplicate.
+const showMeaning = computed(() => props.question.target.meaning !== props.question.target.kana)
+
 // Auto-play the reading on reveal, per the setting (never / on miss / always).
 watch(
   () => props.chosenKey,
@@ -31,7 +39,7 @@ watch(
     if (!key || prev) return
     const mode = settings.autoSound
     if (mode === 'all' || (mode === 'fail' && verdict.value === 'no')) {
-      speak(props.question.target.kana)
+      speak(sayText.value)
     }
   },
 )
@@ -77,7 +85,7 @@ const items = computed<GridItem[]>(() =>
               type="button"
               class="say glyph small"
               aria-label="Play pronunciation"
-              @click.stop="speak(question.target.kana)"
+              @click.stop="speak(sayText)"
             >
               {{ question.target.char }}
             </button>
@@ -91,7 +99,7 @@ const items = computed<GridItem[]>(() =>
                     type="button"
                     class="say-word"
                     aria-label="Play pronunciation"
-                    @click.stop="speak(question.target.kana)"
+                    @click.stop="speak(sayText)"
                   >
                     {{ question.target.kana }}
                     <span class="say-icon">🔊</span>
@@ -99,7 +107,7 @@ const items = computed<GridItem[]>(() =>
                   <template v-else>{{ question.target.kana }}</template>
                 </dd>
               </div>
-              <div><dt>Meaning</dt><dd>{{ question.target.meaning }}</dd></div>
+              <div v-if="showMeaning"><dt>Meaning</dt><dd>{{ question.target.meaning }}</dd></div>
             </dl>
           </template>
         </div>

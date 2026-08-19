@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import { useQuiz } from './composables/useQuiz'
+import { useQuiz, useBasics } from './composables/useQuiz'
 import { useRankings } from './composables/useRankings'
 import { useSettings } from './composables/useSettings'
 import { useBreakpoint } from './composables/useBreakpoint'
@@ -8,6 +8,7 @@ import AppBrand from './components/base/AppBrand.vue'
 import KanjiBadge from './components/base/KanjiBadge.vue'
 import FadeTransition from './components/base/FadeTransition.vue'
 import LearnView from './views/LearnView.vue'
+import BasicsView from './views/BasicsView.vue'
 import RankingView from './views/RankingView.vue'
 import SavedView from './views/SavedView.vue'
 import SettingsView from './views/SettingsView.vue'
@@ -18,19 +19,24 @@ import { Size } from './composables/useTheme'
 
 const NAV: NavItem[] = [
   { id: 'learn', label: 'Learn', kanji: '学' },
+  { id: 'basics', label: 'Basics', kanji: 'あ' },
   { id: 'saved', label: 'Unfinished', kanji: '未' },
   { id: 'ranking', label: 'Ranking', kanji: '位' },
   { id: 'settings', label: 'Settings', kanji: '設' },
 ]
 
 const q = useQuiz()
+const basics = useBasics()
 const { rankings } = useRankings()
 useSettings()
 const { isDesktop } = useBreakpoint()
 const view = ref('learn')
 const menuOpen = ref(false)
 
-onMounted(() => q.start())
+onMounted(() => {
+  q.start()
+  basics.start()
+})
 
 function go(id: string) {
   // Ranked matches can't be left mid-round — navigating away forfeits it.
@@ -92,6 +98,8 @@ function resumeLesson(id: string) {
 
       <FadeTransition>
         <LearnView v-if="view === 'learn'" />
+
+        <BasicsView v-else-if="view === 'basics'" />
 
         <SavedView
           v-else-if="view === 'saved'"

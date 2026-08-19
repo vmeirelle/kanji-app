@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { useQuiz } from '../composables/useQuiz'
+import { useBasics } from '../composables/useQuiz'
 import QuizFlow from './QuizFlow.vue'
 
-const q = useQuiz()
+const q = useBasics()
 </script>
 
 <template>

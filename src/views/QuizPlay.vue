@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useQuiz } from '../composables/useQuiz'
+import type { Quiz } from '../composables/useQuiz'
 import QuizView from './QuizView.vue'
 import BaseProgress from '../components/base/BaseProgress.vue'
 
-const q = useQuiz()
+const props = defineProps<{ quiz: Quiz }>()
+const q = props.quiz
 
 const progress = computed(() =>
   q.passTotal.value ? (q.position.value / q.passTotal.value) * 100 : 0,

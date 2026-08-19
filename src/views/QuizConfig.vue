@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useQuiz } from '../composables/useQuiz'
+import type { Quiz } from '../composables/useQuiz'
 import { levelColor } from '../data/blocks'
 import { FORMATS, type Format } from '../quiz'
 import BaseSegment from '../components/base/BaseSegment.vue'
 import PageHeader from '../components/base/PageHeader.vue'
 import CategoryList from './CategoryList.vue'
 
-const q = useQuiz()
+const props = defineProps<{ quiz: Quiz }>()
+const q = props.quiz
+const basics = computed(() => q.deck === 'basics')
+const unit = computed(() => (basics.value ? 'kana' : 'kanji'))
 
 const modeOptions = [
   { value: 'custom', label: 'Custom' },
@@ -19,12 +22,19 @@ const levelOptions = computed(() =>
 const sizeOptions = computed(() =>
   q.sizeOptions.value.map((n) => ({
     value: n,
-    label: String(n),
+    label: n === 0 ? 'All' : String(n),
     disabled: q.sizeLocked(n),
-    title: q.sizeLocked(n) ? `Only ${q.poolSize.value} kanji at this level` : undefined,
+    title: q.sizeLocked(n) ? `Only ${q.poolSize.value} at this level` : undefined,
   })),
 )
-const formatOptions = FORMATS.map((f) => ({ value: f.id, label: f.label }))
+const formatOptions = computed(() =>
+  basics.value
+    ? [
+        { value: 'char', label: 'Kana' },
+        { value: 'meaning', label: 'Romaji' },
+      ]
+    : FORMATS.map((f) => ({ value: f.id, label: f.label })),
+)
 
 // Show and Answer can't be the same format — picking a match swaps them.
 function setFrom(v: Format) {
@@ -44,17 +54,25 @@ const shownSelected = computed(() =>
 
 <template>
   <section class="pick" :style="{ '--lv': levelColor(q.level.value) }">
-    <PageHeader jp="今日の稽古" title="Today's practice" image="/reading.png" />
+    <PageHeader
+      v-if="basics"
+      jp="かな"
+      title="Basics"
+      image="/reading.png"
+    />
+    <PageHeader v-else jp="今日の稽古" title="Today's practice" image="/reading.png" />
 
     <div class="card">
-      <span class="tag">Game</span>
-      <BaseSegment
-        :options="modeOptions"
-        :model-value="q.mode.value"
-        @update:model-value="q.setMode($event as 'custom' | 'ranked')"
-      />
+      <template v-if="!basics">
+        <span class="tag">Game</span>
+        <BaseSegment
+          :options="modeOptions"
+          :model-value="q.mode.value"
+          @update:model-value="q.setMode($event as 'custom' | 'ranked')"
+        />
+      </template>
 
-      <span class="tag">Japanese level</span>
+      <span class="tag">{{ basics ? 'Script' : 'Japanese level' }}</span>
       <BaseSegment
         :options="levelOptions"
         :model-value="q.level.value"
@@ -62,7 +80,7 @@ const shownSelected = computed(() =>
       />
 
       <div class="head">
-        <span class="tag">Kanji per round</span>
+        <span class="tag">{{ basics ? 'Kana' : 'Kanji' }} per round</span>
         <span class="sub">{{ q.roundSize.value }} of {{ q.poolSize.value }}</span>
       </div>
       <BaseSegment
@@ -104,7 +122,7 @@ const shownSelected = computed(() =>
     </div>
 
     <button class="btn primary" :disabled="!q.poolSize.value" @click="q.startPass">
-      {{ q.mode.value === 'ranked' ? `Start ranked · ${q.roundSize.value} words` : `Start · ${q.roundSize.value} kanji` }}
+      {{ q.mode.value === 'ranked' ? `Start ranked · ${q.roundSize.value} words` : `Start · ${q.roundSize.value} ${unit}` }}
     </button>
   </section>
 </template>
