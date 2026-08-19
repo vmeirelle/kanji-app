@@ -1,6 +1,9 @@
 @import './base.css';
+@import './motion.css';
 
 #app {
+  position: relative;
+  z-index: 1;
   min-height: 100vh;
   width: 100%;
 }

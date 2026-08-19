@@ -38,6 +38,11 @@ function createQuiz() {
   const scored = ref(false)
   const hasRetried = ref(false)
 
+  // Puramente cosmético: alimenta a reação do mascote e o contador de combo.
+  // Não entra em pontuação, ranking nem persistência.
+  const streak = ref(0)
+  const bestStreak = ref(0)
+
   // Ranked-only: accumulated seconds-left across the pass, and the live countdown.
   const rankedScore = ref(0)
   const remaining = ref(0)
@@ -241,6 +246,8 @@ function createQuiz() {
     scored.value = false
     hasRetried.value = false
     rankedScore.value = 0
+    streak.value = 0
+    bestStreak.value = 0
     newQuestion()
     phase.value = 'question'
   }
@@ -253,11 +260,14 @@ function createQuiz() {
     const char = queue.value[0]
     if (picked?.correct) {
       correct.value++
+      streak.value++
+      if (streak.value > bestStreak.value) bestStreak.value = streak.value
       if (mode.value === 'ranked') {
         rankedScore.value += Math.max(0, Math.floor(remaining.value / 1000))
       }
     } else {
       wrong.value++
+      streak.value = 0
       if (char && !incorrect.value.includes(char)) incorrect.value.push(char)
     }
   }
@@ -267,6 +277,7 @@ function createQuiz() {
     if (answered.value || !question.value) return
     chosenKey.value = TIMEOUT_KEY
     wrong.value++
+    streak.value = 0
     const char = queue.value[0]
     if (char && !incorrect.value.includes(char)) incorrect.value.push(char)
   }
@@ -302,6 +313,7 @@ function createQuiz() {
     incorrect.value = []
     correct.value = 0
     wrong.value = 0
+    streak.value = 0
     newQuestion()
     phase.value = 'question'
   }
@@ -319,6 +331,8 @@ function createQuiz() {
       })
     }
     rankedScore.value = 0
+    streak.value = 0
+    bestStreak.value = 0
     queue.value = []
     passTotal.value = 0
     incorrect.value = []
@@ -374,6 +388,8 @@ function createQuiz() {
     passTotal,
     correct,
     wrong,
+    streak,
+    bestStreak,
     incorrectCount,
     canRetry,
     hasRetried,

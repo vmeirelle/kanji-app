@@ -1,0 +1,265 @@
+/* ============================================================
+   Kanji Quiz — vocabulário de movimento
+   Keyframes globais (utilizáveis de dentro de <style scoped>).
+   Metáfora: tinta que assenta, papel que respira, selo que carimba.
+   ============================================================ */
+
+/* --- tinta assentando no papel: desfoca, encorpa, firma ------ */
+@keyframes ink-settle {
+  0% {
+    opacity: 0;
+    filter: blur(9px);
+    transform: scale(1.1);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(1.5px);
+    transform: scale(0.995);
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+/* --- entrada em cascata dos quadrados ----------------------- */
+@keyframes tile-in {
+  0% {
+    opacity: 0;
+    transform: translateY(14px) scale(0.92);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* --- onda que se expande a partir do acerto ------------------ */
+@keyframes ripple-out {
+  0% {
+    opacity: 0.75;
+    transform: scale(0.35);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+/* --- recusa: três oscilações curtas -------------------------- */
+@keyframes shake-x {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  15% {
+    transform: translateX(-8px);
+  }
+  32% {
+    transform: translateX(7px);
+  }
+  50% {
+    transform: translateX(-5px);
+  }
+  68% {
+    transform: translateX(4px);
+  }
+  85% {
+    transform: translateX(-2px);
+  }
+}
+
+/* --- estouro elástico (pontuação, selo, combo) --------------- */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  70% {
+    opacity: 1;
+    transform: scale(1.14);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* --- carimbo de selo: bate forte e assenta ------------------- */
+@keyframes seal-stamp {
+  0% {
+    opacity: 0;
+    transform: scale(2.1) rotate(-14deg);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(0.9) rotate(3deg);
+  }
+  80% {
+    transform: scale(1.06) rotate(-1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* --- mascote: respiração ociosa ------------------------------ */
+@keyframes float-idle {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-1deg);
+  }
+  50% {
+    transform: translateY(-7px) rotate(1.5deg);
+  }
+}
+
+/* --- mascote: pulo de comemoração ---------------------------- */
+@keyframes mascot-cheer {
+  0% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-20px) scale(1.13) rotate(-7deg);
+  }
+  45% {
+    transform: translateY(2px) scale(0.95) rotate(4deg);
+  }
+  65% {
+    transform: translateY(-9px) scale(1.05) rotate(-3deg);
+  }
+  100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+/* --- mascote: tremor de erro --------------------------------- */
+@keyframes mascot-flinch {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  20% {
+    transform: translateX(-6px) rotate(-6deg) scale(0.94);
+  }
+  45% {
+    transform: translateX(5px) rotate(5deg) scale(0.96);
+  }
+  70% {
+    transform: translateX(-3px) rotate(-2deg);
+  }
+}
+
+/* --- enso: o círculo se pinta -------------------------------
+   Termina em --enso-offset (a posição real do valor), não em 0,
+   senão a animação desenharia o círculo inteiro em qualquer valor. */
+@keyframes enso-draw {
+  0% {
+    stroke-dashoffset: var(--enso-len, 320);
+    opacity: 0.2;
+  }
+  100% {
+    stroke-dashoffset: var(--enso-offset, 0);
+    opacity: 1;
+  }
+}
+
+/* --- pulsação de urgência (últimos segundos) ----------------- */
+@keyframes urgent-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.09);
+    opacity: 0.72;
+  }
+}
+
+/* --- halo que respira sob o card ---------------------------- */
+@keyframes glow-breathe {
+  0%,
+  100% {
+    opacity: 0.32;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.55;
+    transform: scale(1.06);
+  }
+}
+
+/* --- respingo de tinta na comemoração ----------------------- */
+@keyframes ink-splash {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2) rotate(0deg);
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx, 0), var(--dy, -120px)) scale(var(--ds, 1)) rotate(var(--dr, 180deg));
+  }
+}
+
+/* --- varredura diagonal ao selecionar categoria -------------- */
+@keyframes sweep-fill {
+  0% {
+    transform: translate(-105%, 105%);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+/* --- brilho correndo (barra de progresso) -------------------- */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(280%);
+  }
+}
+
+/* --- entrada de tela ----------------------------------------- */
+@keyframes view-in {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- classes utilitárias ------------------------------------- */
+.anim-view-in {
+  animation: view-in 0.42s var(--ease-ink) both;
+}
+.anim-pop {
+  animation: pop-in 0.45s var(--ease-spring) both;
+}
+.anim-ink {
+  animation: ink-settle 0.6s var(--ease-ink) both;
+}
+
+/* ============================================================
+   Acessibilidade: desliga tudo de uma vez.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
