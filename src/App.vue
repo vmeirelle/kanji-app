@@ -291,7 +291,7 @@ function finish() {
 }
 .input:focus {
   outline: none;
-  border-color: #16a34a;
+  border-color: var(--brand);
 }
 .btn {
   padding: 0.85rem 1.25rem;
@@ -307,8 +307,8 @@ function finish() {
   cursor: default;
 }
 .btn.primary {
-  border-color: #16a34a;
-  background: #16a34a;
+  border-color: var(--brand);
+  background: var(--brand);
   color: #fff;
 }
 </style>

@@ -108,7 +108,7 @@ const dayLabel = (day: string) => (day === todayStr ? 'Today' : day)
   white-space: nowrap;
 }
 .pct {
-  color: #16a34a;
+  color: var(--brand);
   font-weight: 600;
   font-variant-numeric: tabular-nums;
 }

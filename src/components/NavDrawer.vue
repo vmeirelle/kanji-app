@@ -10,7 +10,7 @@ const emit = defineEmits<{ select: [id: string]; close: [] }>()
     <div v-if="open" class="wrap">
       <div class="backdrop" @click="emit('close')" />
       <aside class="panel">
-        <p class="brand">漢字 Kanji</p>
+        <div class="brand"><img class="brand-logo" src="/logo.png" alt="Kanji Quiz" /></div>
         <nav class="nav">
           <button
             v-for="item in items"
@@ -54,9 +54,11 @@ const emit = defineEmits<{ select: [id: string]; close: [] }>()
   gap: 1.25rem;
 }
 .brand {
-  font-size: 1.25rem;
-  color: var(--color-heading);
   padding: 0 0.5rem;
+}
+.brand-logo {
+  height: 3rem;
+  border-radius: 0.5rem;
 }
 .nav {
   display: flex;
@@ -81,7 +83,7 @@ const emit = defineEmits<{ select: [id: string]; close: [] }>()
 }
 .item.active {
   background: var(--color-background-soft);
-  color: #16a34a;
+  color: var(--brand);
   font-weight: 600;
 }
 .ic {

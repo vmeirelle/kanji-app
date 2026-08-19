@@ -42,6 +42,6 @@ const emit = defineEmits<{ 'update:modelValue': [Format] }>()
 }
 .sel:focus {
   outline: none;
-  border-color: #16a34a;
+  border-color: var(--brand);
 }
 </style>
