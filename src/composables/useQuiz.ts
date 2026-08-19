@@ -13,7 +13,7 @@ const KEY = 'kanji-quiz-state.v7'
 const SIZES = [5, 10, 20, 50, 100]
 const DEFAULT_SIZE = 20
 const RANKED_SIZE = 20
-const TIMER_MS = 10000
+const TIMER_MS = 15000
 const TICK_MS = 100
 // Sentinel chosenKey used when the per-word timer runs out with no answer.
 const TIMEOUT_KEY = '__timeout__'
@@ -52,10 +52,10 @@ export function useQuiz() {
   const answered = computed(() => chosenKey.value !== null)
 
   const levels = computed(() => levelsOf(blocks.value))
-  
+
   const levelBlocks = computed(() => blocksIn(blocks.value, chosenLevels.value))
 
-  
+
   const level = computed(() => chosenLevels.value[0] ?? '')
 
 
@@ -78,26 +78,26 @@ export function useQuiz() {
   const pool = computed(() => poolOf(blocks.value, selected.value))
   const poolSize = computed(() => pool.value.length)
   const queueChars = computed(() => queue.value)
-  
+
   const sizeOptions = computed(() => SIZES)
-  
+
   const sizeLocked = (n: number) => n > poolSize.value && n !== SIZES[0]
-  
+
   const maxSize = computed(() => {
     const fits = SIZES.filter((n) => n <= poolSize.value)
     return fits.length ? fits[fits.length - 1]! : SIZES[0]!
   })
-  
+
   const activeSize = computed(() =>
     (size.value || DEFAULT_SIZE) <= poolSize.value ? size.value || DEFAULT_SIZE : maxSize.value,
   )
-  
+
   const roundSize = computed(() =>
     Math.min(mode.value === 'ranked' ? RANKED_SIZE : activeSize.value, poolSize.value),
   )
   const byChar = (c: string) => pool.value.find((k) => k.char === c) ?? null
   const chosenBlocks = computed(() => blocks.value.filter((b) => selected.value.includes(b.id)))
-  
+
   const selectionName = computed(() => {
     const names = chosenBlocks.value.map((b) => `${b.level} ${b.name}`)
     return names.length > 2 ? `${names[0]} +${names.length - 1}` : names.join(' · ')
@@ -115,7 +115,7 @@ export function useQuiz() {
     () => mode.value === 'custom' && incorrectCount.value > 0 && !hasRetried.value,
   )
 
-  
+
   const roundOf = (): Round => ({
     levels: chosenLevels.value,
     selected: selected.value,
@@ -131,7 +131,7 @@ export function useQuiz() {
     hasRetried: hasRetried.value,
   })
 
-  
+
   function applyRound(r: Round) {
     chosenLevels.value = r.levels.slice(0, 1)
     selected.value = r.selected
@@ -212,7 +212,7 @@ export function useQuiz() {
     phase.value = 'question'
   }
 
-  
+
   function resume(id: string) {
     const lesson = savedLessons.value.find((l) => l.id === id)
     if (!lesson) return
@@ -230,7 +230,7 @@ export function useQuiz() {
     savedLessons.value = dropSaved(savedLessons.value, id)
   }
 
-  
+
   function startPass() {
     if (!poolSize.value) return
     roundId.value = String(Date.now())
@@ -274,7 +274,7 @@ export function useQuiz() {
     if (char && !incorrect.value.includes(char)) incorrect.value.push(char)
   }
 
-  
+
   function next() {
     if (answered.value) advance()
   }
@@ -297,7 +297,7 @@ export function useQuiz() {
     }
   }
 
-  
+
   function retryIncorrect() {
     hasRetried.value = true
     queue.value = incorrect.value
@@ -309,7 +309,7 @@ export function useQuiz() {
     phase.value = 'question'
   }
 
-  
+
   function restart() {
     stopTimer()
     // Only custom rounds can be paused/resumed; ranked runs are discarded.

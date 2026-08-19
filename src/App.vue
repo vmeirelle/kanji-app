@@ -5,6 +5,7 @@ import { useBreakpoint } from './composables/useBreakpoint'
 import { loadRankings, addRanking, today, type Ranking } from './rankings'
 import { levelColor } from './data/blocks'
 import { FORMATS } from './quiz'
+import BaseSegment from './components/base/BaseSegment.vue'
 import CategoryList from './views/CategoryList.vue'
 import QuizView from './views/QuizView.vue'
 import RankingView from './views/RankingView.vue'
@@ -42,6 +43,23 @@ const resultSticker = computed(() => {
   if (p >= 40) return '/confused.png'
   return '/dead.png'
 })
+
+const modeOptions = [
+  { value: 'custom', label: 'Custom' },
+  { value: 'ranked', label: 'Ranked' },
+]
+const levelOptions = computed(() =>
+  q.levels.value.map((l) => ({ value: l, label: l, accent: levelColor(l) })),
+)
+const sizeOptions = computed(() =>
+  q.sizeOptions.value.map((n) => ({
+    value: n,
+    label: String(n),
+    disabled: q.sizeLocked(n),
+    title: q.sizeLocked(n) ? `Only ${q.poolSize.value} kanji at this level` : undefined,
+  })),
+)
+const formatOptions = FORMATS.map((f) => ({ value: f.id, label: f.label }))
 
 function go(id: string) {
   view.value = id
@@ -124,97 +142,46 @@ function finish() {
       <section v-if="q.phase.value === 'ready'" class="pick" :style="{ '--lv': levelColor(q.level.value) }">
         <div class="card">
           <span class="tag">Game</span>
-          <div class="seg">
-            <button
-              type="button"
-              class="seg-btn"
-              :class="{ on: q.mode.value === 'custom' }"
-              :aria-pressed="q.mode.value === 'custom'"
-              @click="q.setMode('custom')"
-            >
-              <span class="seg-main">Custom</span>
-            </button>
-            <button
-              type="button"
-              class="seg-btn"
-              :class="{ on: q.mode.value === 'ranked' }"
-              :aria-pressed="q.mode.value === 'ranked'"
-              @click="q.setMode('ranked')"
-            >
-              <span class="seg-main">Ranked</span>
-            </button>
-          </div>
+          <BaseSegment
+            :options="modeOptions"
+            :model-value="q.mode.value"
+            @update:model-value="q.setMode($event as 'custom' | 'ranked')"
+          />
 
           <span class="tag">Japanese level</span>
-          <div class="seg">
-            <button
-              v-for="l in q.levels.value"
-              :key="l"
-              type="button"
-              class="seg-btn"
-              :class="{ on: q.level.value === l }"
-              :style="{ '--lv': levelColor(l) }"
-              :aria-pressed="q.level.value === l"
-              @click="q.setLevel(l)"
-            >
-              <span class="seg-main">{{ l }}</span>
-            </button>
-          </div>
+          <BaseSegment
+            :options="levelOptions"
+            :model-value="q.level.value"
+            @update:model-value="q.setLevel($event)"
+          />
 
           <div class="head">
             <span class="tag">Kanji per round</span>
             <span class="sub">{{ q.roundSize.value }} of {{ q.poolSize.value }} selected</span>
           </div>
-          <div class="seg">
-            <button
-              v-for="n in q.sizeOptions.value"
-              :key="n"
-              type="button"
-              class="seg-btn"
-              :class="{ on: q.activeSize.value === n }"
-              :disabled="q.sizeLocked(n) || q.mode.value === 'ranked'"
-              :aria-pressed="q.activeSize.value === n"
-              :title="q.sizeLocked(n) ? `Only ${q.poolSize.value} kanji at this level` : undefined"
-              @click="q.size.value = n"
-            >
-              <span class="seg-main">{{ n }}</span>
-            </button>
-          </div>
+          <BaseSegment
+            :options="sizeOptions"
+            :model-value="q.activeSize.value"
+            :disabled="q.mode.value === 'ranked'"
+            @update:model-value="q.size.value = $event"
+          />
 
           <div class="duo">
             <div class="col">
               <span class="tag">Show (From)</span>
-              <div class="seg">
-                <button
-                  v-for="f in FORMATS"
-                  :key="f.id"
-                  type="button"
-                  class="seg-btn"
-                  :class="{ on: q.from.value === f.id }"
-                  :disabled="q.mode.value === 'ranked'"
-                  :aria-pressed="q.from.value === f.id"
-                  @click="q.from.value = f.id"
-                >
-                  <span class="seg-main">{{ f.label }}</span>
-                </button>
-              </div>
+              <BaseSegment
+                :options="formatOptions"
+                :disabled="q.mode.value === 'ranked'"
+                v-model="q.from.value"
+              />
             </div>
             <div class="col">
               <span class="tag">Answer (To)</span>
-              <div class="seg">
-                <button
-                  v-for="f in FORMATS"
-                  :key="f.id"
-                  type="button"
-                  class="seg-btn"
-                  :class="{ on: q.to.value === f.id }"
-                  :disabled="q.mode.value === 'ranked'"
-                  :aria-pressed="q.to.value === f.id"
-                  @click="q.to.value = f.id"
-                >
-                  <span class="seg-main">{{ f.label }}</span>
-                </button>
-              </div>
+              <BaseSegment
+                :options="formatOptions"
+                :disabled="q.mode.value === 'ranked'"
+                v-model="q.to.value"
+              />
             </div>
           </div>
         </div>
@@ -455,53 +422,6 @@ function finish() {
   font-variant-numeric: tabular-nums;
 }
 
-.seg {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  border: 2px solid var(--color-border);
-  border-radius: 0.8rem;
-  overflow: hidden;
-  background: var(--color-background);
-}
-.seg-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.05rem;
-  padding: 0.5rem 0.25rem;
-  border: none;
-  border-left: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-text);
-  font-size: 0.95rem;
-  line-height: 1.2;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.seg-btn:first-child {
-  border-left: none;
-}
-.seg-btn:hover:not(:disabled):not(.on) {
-  background: var(--color-background-mute);
-}
-.seg-btn.on {
-  background: var(--lv, var(--brand));
-  color: #fff;
-  font-weight: 600;
-}
-
-.seg-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-.seg-btn.on:disabled {
-  opacity: 1;
-  cursor: default;
-  background: var(--color-background-mute);
-  color: var(--color-text);
-  font-weight: 600;
-}
 .lead {
   text-align: center;
   font-size: 1.25rem;

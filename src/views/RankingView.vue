@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { today, addDays, points, type Ranking } from '../rankings'
 import { levelColor } from '../data/blocks'
 import EmptyState from '../components/base/EmptyState.vue'
+import BaseSegment from '../components/base/BaseSegment.vue'
 
 const props = defineProps<{ rankings: Ranking[]; levels: string[] }>()
 
@@ -10,6 +11,11 @@ type LevelGroup = { level: string; entries: Ranking[] }
 
 const day = ref(today())
 const level = ref('')
+
+const filterOptions = computed(() => [
+  { value: '', label: 'All' },
+  ...props.levels.map((l) => ({ value: l, label: l, accent: levelColor(l) })),
+])
 const isToday = computed(() => day.value === today())
 const dayOf = (r: Ranking) => r.day ?? r.date.slice(0, 10)
 
@@ -57,22 +63,7 @@ const onEnd = (e: TouchEvent) => {
       <button class="chev" :disabled="!canNewer" aria-label="Next day" @click="newer">›</button>
     </div>
 
-    <div class="seg">
-      <button type="button" class="seg-btn" :class="{ on: level === '' }" @click="level = ''">
-        All
-      </button>
-      <button
-        v-for="l in props.levels"
-        :key="l"
-        type="button"
-        class="seg-btn"
-        :class="{ on: level === l }"
-        :style="{ '--lv': levelColor(l) }"
-        @click="level = l"
-      >
-        {{ l }}
-      </button>
-    </div>
+    <BaseSegment class="filter-seg" :options="filterOptions" v-model="level" />
 
     <EmptyState v-if="!groups.length" src="/lost.png">
       No scores on this day.<template v-if="isToday"> Play a ranked round to put a name up here.</template>
@@ -123,36 +114,8 @@ const onEnd = (e: TouchEvent) => {
   font-weight: 600;
   color: var(--color-heading);
 }
-.seg {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: minmax(0, 1fr);
-  border: 2px solid var(--color-border);
-  border-radius: 0.8rem;
-  overflow: hidden;
-  background: var(--color-background);
+.filter-seg {
   margin-bottom: 1.25rem;
-}
-.seg-btn {
-  padding: 0.5rem 0.25rem;
-  border: none;
-  border-left: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-text);
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-.seg-btn:first-child {
-  border-left: none;
-}
-.seg-btn:hover:not(.on) {
-  background: var(--color-background-mute);
-}
-.seg-btn.on {
-  background: var(--lv, var(--brand));
-  color: #fff;
 }
 .block {
   margin-bottom: 1.5rem;
