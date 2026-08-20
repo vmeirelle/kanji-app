@@ -1,9 +1,6 @@
 <script setup lang="ts">
 import BaseImage from './BaseImage.vue'
 
-// Shared page header: Japanese subtitle, title, mascot image and a divider.
-// The Japanese line takes the level colour (--lv) when the page provides one.
-// The mascot is sized by height so images of different aspect ratios match.
 defineProps<{ title: string; jp?: string; image?: string }>()
 </script>
 

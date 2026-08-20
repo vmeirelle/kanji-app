@@ -36,13 +36,11 @@
   --brand: #444444;
 
 
-  /* JLPT levels: distinct, muted-rich hues (indigo -> rose). */
   --lv-N5: #4a86b3;
   --lv-N4: #4f9d78;
   --lv-N3: #d1a23c;
   --lv-N2: #db6f3f;
   --lv-N1: #c04a5c;
-  /* Basics scripts. */
   --lv-Hiragana: #4a86b3;
   --lv-Katakana: #db6f3f;
   --lv-Both: #4f9d78;
@@ -55,12 +53,9 @@
 
   --sidebar: 13rem;
 
-  /* Textbook (kyokasho) style for the large kanji glyphs learners study.
-     --font-kana can be switched off separately via settings. */
   --font-kanji: 'Klee One', 'Noto Serif JP', serif;
   --font-kana: 'Klee One', 'Noto Serif JP', serif;
 
-  /* Mascot palette: sumi ink, cream paper, pink blush. */
   --ink: #2a2a2e;
   --ink-deep: #141416;
   --paper: #f4eede;
@@ -69,7 +64,6 @@
   --section-gap: 160px;
 }
 
-/* Warm night palette, shared by system-dark and forced dark. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme]) {
     --lv-N5: #6ea9cf;
@@ -116,7 +110,6 @@
   --danger-soft: #ec949a30;
 }
 
-/* Accessibility: collapse all JLPT level accents to one soft neutral. */
 :root.no-lv {
   --lv-N5: var(--brand);
   --lv-N4: var(--brand);
@@ -128,7 +121,6 @@
   --lv-Both: var(--brand);
 }
 
-/* Accessibility: kill motion (transitions, animations, smooth scroll). */
 :root.no-motion *,
 :root.no-motion *::before,
 :root.no-motion *::after {

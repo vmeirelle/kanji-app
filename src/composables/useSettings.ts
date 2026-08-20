@@ -29,7 +29,6 @@ function apply(s: Settings) {
   else root.dataset.theme = s.theme
   root.classList.toggle('no-lv', s.noLevelColors)
   root.classList.toggle('no-motion', s.noMotion)
-  // Kanji font is on unless "none"; kana font is on only for "both".
   root.style.setProperty('--font-kanji', s.jpFont === 'none' ? 'inherit' : KLEE)
   root.style.setProperty('--font-kana', s.jpFont === 'both' ? KLEE : 'inherit')
 }

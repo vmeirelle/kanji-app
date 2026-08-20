@@ -74,7 +74,6 @@ function stateStyle(item: GridItem): CSSProperties {
 .square:active:not(:disabled) {
   transform: scale(0.96);
 }
-/* Kanji/kana options: Japanese font, a touch larger. */
 .square.kanji {
   font-family: var(--font-kanji);
   font-size: clamp(1.3rem, 6vw, 1.9rem);

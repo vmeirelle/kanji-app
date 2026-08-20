@@ -1,6 +1,4 @@
 <script setup lang="ts">
-// A kanji rendered in a coloured tile with a black (ink) glyph.
-// Rounded-square by default (brand mark), fully round for section icons.
 withDefaults(defineProps<{ char: string; size?: number; round?: boolean }>(), {
   size: 2.5,
   round: false,
@@ -34,7 +32,6 @@ withDefaults(defineProps<{ char: string; size?: number; round?: boolean }>(), {
   font-size: calc(var(--size) * 0.58);
   line-height: 1;
   color: var(--ink);
-  /* Optically centre the glyph — CJK metrics sit slightly low otherwise. */
   transform: translateY(-0.04em);
 }
 </style>

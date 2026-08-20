@@ -1,6 +1,5 @@
 import type { Block, Kanji } from './blocks'
 
-// Each row of the syllabary is one category. [hiragana, katakana, romaji]
 type Row = { key: string; items: [string, string, string][] }
 
 const ROWS: Row[] = [

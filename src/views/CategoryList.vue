@@ -12,7 +12,6 @@ const groups = computed(() =>
 const has = (id: string) => props.selected.includes(id)
 const countOn = (blocks: Block[]) => blocks.filter((b) => has(b.id)).length
 
-// Changing level swaps the whole set — crossfade it (no movement).
 const levelKey = computed(() => levelsOf(props.blocks).join('-'))
 
 function toggle(id: string) {

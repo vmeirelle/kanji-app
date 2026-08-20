@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { computed, type CSSProperties } from 'vue'
 
-// Constrain by width OR height (in rem) — the other stays auto so the image
-// scales proportionally without distortion. `size` is a width shorthand.
 const props = withDefaults(
   defineProps<{ src: string; alt?: string; width?: number; height?: number; size?: number }>(),
   { alt: '' },

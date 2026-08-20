@@ -43,11 +43,9 @@ onMounted(() => {
 })
 
 function go(id: string) {
-  // Ranked matches can't be left mid-round — navigating away forfeits it.
   if (id !== 'learn' && q.mode.value === 'ranked' && q.phase.value !== 'ready') q.restart()
   view.value = id
   menuOpen.value = false
-  // Pull the current global board each time the ranking view opens.
   if (id === 'ranking') refreshRankings()
 }
 
@@ -149,7 +147,6 @@ function resumeLesson(id: string) {
   height: 100dvh;
   overflow: hidden;
 }
-/* The active view fills the fixed-height app; it scrolls internally, page does not. */
 .app > :not(.top) {
   flex: 1 1 auto;
   min-height: 0;

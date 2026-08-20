@@ -11,13 +11,11 @@ export type Deck = 'kanji' | 'basics'
 
 type Persisted = Round & { from: Format; to: Format; mode: Mode }
 
-// A size of 0 means "all" (the whole selected pool).
 type QuizOpts = { deck: Deck; key: string; load: () => Promise<Block[]>; sizes: number[]; defaultSize: number }
 
 const RANKED_SIZE = 20
 const TIMER_MS = 15000
 const TICK_MS = 100
-// Sentinel chosenKey used when the per-word timer runs out with no answer.
 const TIMEOUT_KEY = '__timeout__'
 
 function createQuiz(opts: QuizOpts) {
@@ -41,7 +39,6 @@ function createQuiz(opts: QuizOpts) {
   const scored = ref(false)
   const hasRetried = ref(false)
 
-  // Ranked-only: accumulated seconds-left across the pass, and the live countdown.
   const rankedScore = ref(0)
   const remaining = ref(0)
   const secondsLeft = computed(() => Math.ceil(remaining.value / 1000))
@@ -68,7 +65,6 @@ function createQuiz(opts: QuizOpts) {
     selected.value = blocksIn(blocks.value, [l]).map((b) => b.id)
   }
 
-  // Ranked locks the config: 20 words, Kanji -> Kana, every category in the level.
   function setMode(m: Mode) {
     mode.value = m
     if (m === 'ranked') {
@@ -83,7 +79,6 @@ function createQuiz(opts: QuizOpts) {
 
   const sizeOptions = computed(() => opts.sizes)
 
-  // "All" (0) is always selectable; a numeric size locks only if it exceeds the pool.
   const sizeLocked = (n: number) => n !== 0 && n > poolSize.value && n !== opts.sizes[0]
 
   const maxSize = computed(() => {
@@ -117,7 +112,6 @@ function createQuiz(opts: QuizOpts) {
     firstTotal.value ? Math.round((firstCorrect.value / firstTotal.value) * 100) : 0,
   )
 
-  // Custom rounds can retry their misses repeatedly until none remain.
   const canRetry = computed(() => mode.value === 'custom' && incorrectCount.value > 0)
 
 
@@ -159,8 +153,6 @@ function createQuiz(opts: QuizOpts) {
     }
   }
 
-  // Wall-clock based: `remaining` is derived from a fixed deadline, so a
-  // throttled/coalesced interval (e.g. background tabs) can't drift the score.
   function startTimer() {
     stopTimer()
     const deadline = Date.now() + TIMER_MS
@@ -204,7 +196,6 @@ function createQuiz(opts: QuizOpts) {
     to.value = saved.to ?? 'meaning'
     mode.value = saved.mode ?? 'custom'
 
-    // Ranked runs aren't resumable (timer/score integrity); always start fresh.
     if (mode.value === 'ranked') {
       setMode('ranked')
       return
@@ -270,7 +261,6 @@ function createQuiz(opts: QuizOpts) {
     }
   }
 
-  // Timer expired with no pick: count it wrong (0 pts) and flip the card red.
   function timeout() {
     if (answered.value || !question.value) return
     chosenKey.value = TIMEOUT_KEY
@@ -317,7 +307,6 @@ function createQuiz(opts: QuizOpts) {
 
   function restart() {
     stopTimer()
-    // Only custom kanji rounds can be paused/resumed; ranked & basics are discarded.
     if (queue.value.length && mode.value === 'custom' && opts.deck === 'kanji') {
       savedLessons.value = putSaved(savedLessons.value, {
         ...roundOf(),
@@ -402,7 +391,6 @@ function createQuiz(opts: QuizOpts) {
 
 export type Quiz = ReturnType<typeof createQuiz>
 
-// One shared instance per deck so every view reads and writes the same state.
 let kanji: Quiz | null = null
 let basics: Quiz | null = null
 
@@ -421,7 +409,6 @@ export function useBasics(): Quiz {
     deck: 'basics',
     key: 'kana-quiz-state.v1',
     load: loadKana,
-    // 0 = "All"; always selectable.
     sizes: [5, 10, 20, 0],
     defaultSize: 20,
   }))

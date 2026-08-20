@@ -24,15 +24,12 @@ const verdict = computed(() => {
 
 const promptScript = computed(() => scriptOf(props.prompt))
 
-// Speak the Japanese-script text so TTS says the syllable, not romaji letters.
 const sayText = computed(() => {
   const t = props.question.target
   return isJapanese(t.kana) ? t.kana : t.char
 })
-// Basics rows repeat the reading as the meaning — hide the duplicate.
 const showMeaning = computed(() => props.question.target.meaning !== props.question.target.kana)
 
-// Auto-play the reading on reveal, per the setting (never / on miss / always).
 watch(
   () => props.chosenKey,
   (key, prev) => {
@@ -77,8 +74,6 @@ const items = computed<GridItem[]>(() =>
           </div>
         </div>
         <div class="face back" :class="verdict">
-          <!-- Only render while answered, so the flip-back to the next question
-               never briefly reveals its answer. -->
           <template v-if="chosenKey">
             <button
               v-if="supported"
@@ -212,7 +207,6 @@ const items = computed<GridItem[]>(() =>
 .glyph.kana {
   font-family: var(--font-kana);
 }
-/* English prompts: normal font, much smaller so long words fit. */
 .glyph.en {
   font-family: inherit;
   font-size: clamp(1.5rem, 7vw, 2.6rem);

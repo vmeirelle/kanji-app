@@ -4,7 +4,6 @@ import PageHeader from '../components/base/PageHeader.vue'
 
 const emit = defineEmits<{ go: [id: string] }>()
 
-// Mockup content — static placeholders, no real data yet.
 const news = [
   { tag: 'New', title: 'Basics mode is here', body: 'Drill hiragana & katakana row by row.', when: 'Today' },
   { tag: 'Soon', title: 'Vocabulary & phrases', body: 'Words you master turn into sentences.', when: 'Coming' },
@@ -18,7 +17,6 @@ const progress = [
   { id: 'ranking', title: 'Ranking', sub: 'Best 87 pts', accent: levelColor('N1'), bars: [40, 55, 48, 65, 60, 74, 90] },
 ]
 
-// Kanji completion per JLPT level (mock).
 const kanjiLevels = [
   { level: 'N5', done: 47, total: 79 },
   { level: 'N4', done: 22, total: 166 },
@@ -28,7 +26,6 @@ const kanjiLevels = [
 ]
 const pct = (d: number, t: number) => Math.round((d / t) * 100)
 
-// Daily streak activity — 5 weeks of intensity 0..4 (mock, deterministic).
 const streakCount = 12
 const days = Array.from({ length: 35 }, (_, i) => (i * 3 + 2) % 5)
 </script>

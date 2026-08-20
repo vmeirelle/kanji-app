@@ -36,7 +36,6 @@ const formatOptions = computed(() =>
     : FORMATS.map((f) => ({ value: f.id, label: f.label })),
 )
 
-// Show and Answer can't be the same format — picking a match swaps them.
 function setFrom(v: Format) {
   if (v === q.to.value) q.to.value = q.from.value
   q.from.value = v
@@ -46,7 +45,6 @@ function setTo(v: Format) {
   q.to.value = v
 }
 
-// Ranked locks the config; show it regardless of leftover custom state.
 const shownSelected = computed(() =>
   q.mode.value === 'ranked' ? q.levelBlocks.value.map((b) => b.id) : q.selected.value,
 )
@@ -135,8 +133,6 @@ const shownSelected = computed(() =>
   flex: 1;
   min-height: 0;
 }
-/* Only the category grid scrolls; header, config and the Start button stay put.
-   Native scrollbar (auto-hides / overlays), with padding so it clears the tiles. */
 .cats {
   flex: 1;
   min-height: 0;

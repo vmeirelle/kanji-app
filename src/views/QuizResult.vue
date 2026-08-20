@@ -133,8 +133,6 @@ function finish() {
   padding: 1rem;
   background: rgba(0, 0, 0, 0.5);
 }
-/* Backdrop covers the sidebar (so the menu recedes), but the modal box stays
-   centred in the content column. */
 @media (min-width: 48rem) {
   .overlay {
     padding-left: calc(var(--sidebar) + 1rem);

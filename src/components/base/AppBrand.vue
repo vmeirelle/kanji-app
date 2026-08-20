@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import KanjiBadge from './KanjiBadge.vue'
 
-// App wordmark: a kanji "mark" (読 = to read) plus the name.
-// `end` mirrors it (mark on the right) for right-aligned placements.
 withDefaults(defineProps<{ compact?: boolean; end?: boolean }>(), {
   compact: false,
   end: false,

@@ -1,4 +1,3 @@
-// Browser Web Speech API — pronounce Japanese text with no assets to ship.
 const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
 
 export function useSpeech() {

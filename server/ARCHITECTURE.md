@@ -1,56 +1,59 @@
 # Server Architecture
 
-Clean architecture. Dependencies point inward only. Inner layers never import outer ones.
+Clean Architecture, modeled on the `mypage-backend` reference. Four layers, dependencies point inward. Errors flow as `ts-results` `Result<Ok, Err>` — no throwing across layers. Dependency injection via tsyringe.
 
 ```
-interfaces/http  →  application  →  domain
-        ▲               ▲             ▲
-        └──────── infrastructure ─────┘   (implements the interfaces above)
+InterfaceAdapters  →  AplicationBusiness  →  EnterpriseBusiness
+        │                    │                      │
+        └───────────  Main (composition)  ──────────┘
 ```
 
 ## Layers
 
-### domain (`src/domain`)
-The core. Pure TypeScript, zero framework or library imports.
-- `entities/` — `User`, `Ranking`: models plus the little behavior they own.
-- `repositories/` — persistence interfaces (`UserRepository`, `RankingRepository`). Ports the domain defines and the outside implements.
-- `errors/` — `DomainError` subclasses with a `code`; the HTTP layer maps codes to statuses.
+### EnterpriseBusiness (`src/EnterpriseBusiness`)
+Enterprise rules. No framework imports.
+- `entities/` — `User`, `Ranking`, base `Entity`, `objectValues/Id`.
+- `errors/` — `TagError` base (each error one file, carries a `tag`), plus `form/FormError`, `token/*`.
+- `useCases/` — use-case **contracts**: `useCase.ts` (`UseCase<Form, Res, Errors>`), and per feature the `Form` / `Result` / `Errors` types + the `I*UseCase` alias.
 
-### application (`src/application`)
-Business rules expressed as use cases. Depends only on `domain`. No Hono, no Prisma.
-- `use-cases/` — one interface + one implementation each: `RegisterUser`, `LoginUser`, `GetMe`, `SubmitScore`, `ListRankings`.
-- `ports/` — interfaces for capabilities the use cases need: `PasswordHasher`, `TokenService`.
-- `dtos/` — plain input/output shapes for use cases.
+### AplicationBusiness (`src/AplicationBusiness`)
+Application rules. Depends only on EnterpriseBusiness.
+- `useCases/` — use-case **implementations** (`@injectable`, `@inject` deps), guarded by `@ValidateForm`.
+- `repository/` — `I*Repository` ports.
+- `services/` — `IHashService`, `ITokenService` ports.
+- `validators/` — zod builders. `decorators/ValidateForm.ts` — validates the form, returns `Err(FormError)` on failure.
 
-### infrastructure (`src/infrastructure`)
-Adapters that implement the interfaces from `domain` and `application`.
-- `repositories/` — `PrismaUserRepository`, `PrismaRankingRepository`.
-- `security/` — `Md5PasswordHasher`, `JwtTokenService`.
-- `db/` — Prisma client factory.
-- `config/` — zod-validated environment loading.
+### InterfaceAdapters (`src/InterfaceAdapters`)
+Adapters implementing the ports.
+- `repository/` — TypeORM `UserRepository`, `RankingRepository` + `models/main/*Model`.
+- `services/` — `HashService`, `TokenService`.
+- `adapters/` — port interfaces (`IHashAdapter`, `ITokenAdapter`, `IHttpServerAdapter`, `IContainerAdapter`).
+- `gateway/http/` — the `HttpServer` gateway + `@Route/@Get/@Post` decorators + `Http.types`.
+- `controllers/http/` — `HttpController` base (error → HTTP mapping) and the `*HttpApiController`s. Each endpoint returns an `HttpResult`.
 
-### interfaces/http (`src/interfaces/http`)
-The delivery mechanism (Hono). Translates HTTP to use-case calls and back.
-- `controllers/` — one interface + one implementation each. Validate the request body/query with zod, call a use case, return a typed response.
-- `contracts/` — request schemas and response types. The typed boundary of the API.
-- `routes/` — map paths to controller methods; attach auth middleware.
-- `middleware/` — `auth` (verify JWT → set `userId`), `error` (map errors to HTTP).
+### Main (`src/Main`)
+Frameworks & wiring.
+- `adapters/` — `ContainerAdapter` (tsyringe), `HashAdapter` (md5), `JwtAdapter` (jsonwebtoken), `HttpServerAdapter` (node http).
+- `container/` — DI registrations: `services`, `repositories`, `useCases`, `database` (TypeORM DataSource + `initDatabase`).
 
-## Composition root (`src/main.ts`)
-The only place that knows every concrete class. It instantiates adapters, injects them into use cases, injects use cases into controllers, mounts routes, and starts the server. Swapping an adapter (e.g. `Md5PasswordHasher` → an argon2 hasher, or Prisma → another ORM) is a one-line change here and nothing else moves.
+### Entry points
+- `src/main.ts` — `startCleanArchitecture`: resolves use cases from the container, builds controllers, registers them on the `HttpServer`.
+- `src/server.ts` — boots the DB, creates the node http server, routes requests through the gateway, express as 404 fallback.
+
+## Stack
+Express (fallback) · custom `HttpServer` gateway · TypeORM + MySQL · tsyringe · ts-results · zod (via `@ValidateForm`) · jsonwebtoken · md5.
 
 ## API
 
-| Method | Path             | Auth | Body / Query                          | Response            |
-|--------|------------------|------|---------------------------------------|---------------------|
-| POST   | `/auth/register` | –    | `{ username, password }`              | `{ user, token }`   |
-| POST   | `/auth/login`    | –    | `{ username, password }`              | `{ user, token }`   |
-| GET    | `/auth/me`       | JWT  | –                                     | `{ id, username, createdAt }` |
-| GET    | `/rankings`      | –    | `?day=YYYY-MM-DD&level=`              | `{ rankings: [...] }` |
-| POST   | `/rankings`      | JWT  | `{ level, correct, total, points }`   | `{ ranking }`       |
+| Method | Path             | Auth | Body / Query                          | Success |
+|--------|------------------|------|---------------------------------------|---------|
+| POST   | `/api/auth/register` | –  | `{ username, password }`              | 201 `{ user, token }` |
+| POST   | `/api/auth/login`    | –  | `{ username, password }`              | 200 `{ user, token }` |
+| GET    | `/api/auth/me`       | JWT | –                                    | 200 `{ id, username, createdAt }` |
+| GET    | `/api/rankings`      | –  | `?day=YYYY-MM-DD&level=`              | 200 `{ rankings }` |
+| POST   | `/api/rankings`      | JWT | `{ level, correct, total, points }`  | 201 `{ ranking }` |
 
-`POST /rankings` stamps `day` and `date` server-side and derives the leaderboard name from the authenticated user — the client cannot spoof either.
+`POST /api/rankings` stamps `day`/`date` server-side and takes the user id from the JWT — the client cannot spoof score name or date.
 
 ## Password hashing
-
-Per project decision: SHA-256 on the frontend, MD5 on the backend (`Md5PasswordHasher`). This storage is fast and unsalted and would not withstand a database leak. It is isolated behind the `PasswordHasher` port so it can be replaced by a salted, slow hash (argon2/bcrypt) without touching any use case.
+Per project decision: SHA-256 on the frontend, MD5 on the backend (`HashAdapter.md5`). Fast and unsalted — it would not withstand a DB leak. Isolated behind `IHashService` / `IHashAdapter`, so swapping to a salted slow hash (argon2/bcrypt) touches only the adapter.

@@ -1,6 +1,3 @@
-// Thin wrapper over Supabase's REST (PostgREST) API. No SDK dependency: the app
-// stays vue-only. The anon key is public by design — RLS on the `rankings` table
-// restricts anon to INSERT + SELECT.
 import type { Ranking } from './rankings'
 
 const URL = import.meta.env.VITE_SUPABASE_URL
