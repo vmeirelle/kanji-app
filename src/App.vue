@@ -31,7 +31,7 @@ const NAV: NavItem[] = [
 
 const q = useQuiz()
 const basics = useBasics()
-const { rankings } = useRankings()
+const { rankings, loading: rankingsLoading, error: rankingsError, refresh: refreshRankings } = useRankings()
 useSettings()
 const { isDesktop } = useBreakpoint()
 const view = ref('home')
@@ -47,6 +47,8 @@ function go(id: string) {
   if (id !== 'learn' && q.mode.value === 'ranked' && q.phase.value !== 'ready') q.restart()
   view.value = id
   menuOpen.value = false
+  // Pull the current global board each time the ranking view opens.
+  if (id === 'ranking') refreshRankings()
 }
 
 function goHome() {
@@ -116,7 +118,14 @@ function resumeLesson(id: string) {
           @drop="q.drop"
         />
 
-        <RankingView v-else-if="view === 'ranking'" :rankings="rankings" :levels="q.levels.value" />
+        <RankingView
+          v-else-if="view === 'ranking'"
+          :rankings="rankings"
+          :levels="q.levels.value"
+          :loading="rankingsLoading"
+          :error="rankingsError"
+          @retry="refreshRankings"
+        />
 
         <SettingsView v-else-if="view === 'settings'" />
 

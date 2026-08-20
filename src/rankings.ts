@@ -1,4 +1,4 @@
-import * as storage from './storage'
+import { fetchRankings, insertRanking } from './supabase'
 
 export type Ranking = {
   name: string
@@ -10,16 +10,12 @@ export type Ranking = {
   date: string
 }
 
-const KEY = 'kanji-rankings.v3'
-
 export const points = (r: Ranking): number => r.points
 
-export const loadRankings = (): Ranking[] => storage.load<Ranking[]>(KEY) ?? []
+export const loadRankings = (): Promise<Ranking[]> => fetchRankings()
 
-export function addRanking(entry: Ranking): Ranking[] {
-  const all = [...loadRankings(), entry].sort((a, b) => points(b) - points(a))
-  storage.save(KEY, all)
-  return all
+export async function addRanking(entry: Ranking): Promise<void> {
+  await insertRanking(entry)
 }
 
 export const today = (): string => new Date().toLocaleDateString('en-CA')

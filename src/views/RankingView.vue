@@ -7,7 +7,13 @@ import BaseSegment from '../components/base/BaseSegment.vue'
 import FadeTransition from '../components/base/FadeTransition.vue'
 import PageHeader from '../components/base/PageHeader.vue'
 
-const props = defineProps<{ rankings: Ranking[]; levels: string[] }>()
+const props = defineProps<{
+  rankings: Ranking[]
+  levels: string[]
+  loading?: boolean
+  error?: boolean
+}>()
+defineEmits<{ retry: [] }>()
 
 type LevelGroup = { level: string; entries: Ranking[] }
 
@@ -69,7 +75,16 @@ const onEnd = (e: TouchEvent) => {
 
     <BaseSegment class="filter-seg" :options="filterOptions" v-model="level" />
 
-    <div class="scroll">
+    <div v-if="loading" class="state">
+      <span class="spinner" aria-label="Loading rankings" />
+    </div>
+
+    <EmptyState v-else-if="error" src="/lost.png">
+      Couldn't load the ranking.
+      <button class="retry" @click="$emit('retry')">Try again</button>
+    </EmptyState>
+
+    <div v-else class="scroll">
       <FadeTransition>
         <div class="results" :key="day + '|' + level">
         <EmptyState v-if="!groups.length" src="/lost.png">
@@ -112,6 +127,36 @@ const onEnd = (e: TouchEvent) => {
   min-height: 0;
   overflow-y: auto;
   padding-right: 0.5rem;
+}
+.state {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.spinner {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 3px solid var(--color-border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.retry {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.5rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-background-soft);
+  color: var(--color-heading);
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 .daynav {
   display: flex;

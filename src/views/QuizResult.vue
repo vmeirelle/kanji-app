@@ -14,6 +14,8 @@ const { save } = useRankings()
 
 const name = ref('')
 const saved = ref(false)
+const saving = ref(false)
+const saveError = ref(false)
 
 const sticker = computed(() => {
   const p = q.pct.value
@@ -23,24 +25,34 @@ const sticker = computed(() => {
   return '/dead.png'
 })
 
-function saveScore() {
-  if (!name.value.trim() || saved.value || q.mode.value !== 'ranked') return
-  save({
-    name: name.value.trim(),
-    level: q.level.value,
-    correct: q.firstCorrect.value,
-    total: q.firstTotal.value,
-    points: q.rankedScore.value,
-    day: today(),
-    date: new Date().toISOString(),
-  })
-  saved.value = true
+async function saveScore() {
+  if (!name.value.trim() || saved.value || saving.value || q.mode.value !== 'ranked') return
+  saving.value = true
+  saveError.value = false
+  try {
+    await save({
+      name: name.value.trim(),
+      level: q.level.value,
+      correct: q.firstCorrect.value,
+      total: q.firstTotal.value,
+      points: q.rankedScore.value,
+      day: today(),
+      date: new Date().toISOString(),
+    })
+    saved.value = true
+  } catch {
+    saveError.value = true
+  } finally {
+    saving.value = false
+  }
 }
 
 function finish() {
   q.restart()
   name.value = ''
   saved.value = false
+  saving.value = false
+  saveError.value = false
 }
 </script>
 
@@ -95,11 +107,14 @@ function finish() {
         <button
           class="save"
           :class="{ done: saved }"
-          :disabled="saved || !name.trim()"
+          :disabled="saved || saving || !name.trim()"
           @click="saveScore"
         >
-          {{ saved ? 'Saved ✓' : 'Save to ranking' }}
+          {{ saved ? 'Saved ✓' : saving ? 'Saving…' : saveError ? 'Retry save' : 'Save to ranking' }}
         </button>
+        <BaseText v-if="saveError" :size="Size.Xs" :color="Color.Text" :align="Align.Center">
+          Couldn't reach the ranking. Try again.
+        </BaseText>
       </template>
 
       <BaseButton :variant="Variant.Plain" block @click="finish">Finish</BaseButton>
