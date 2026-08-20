@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import type { Quiz } from '../composables/useQuiz'
 import { useRankings } from '../composables/useRankings'
-import { today } from '../rankings'
+import { useAuth } from '../composables/useAuth'
 import { Size, Color, Align, Variant } from '../composables/useTheme'
 import BaseImage from '../components/base/BaseImage.vue'
 import BaseText from '../components/base/BaseText.vue'
@@ -11,11 +11,12 @@ import BaseButton from '../components/base/BaseButton.vue'
 const props = defineProps<{ quiz: Quiz }>()
 const q = props.quiz
 const { save } = useRankings()
+const { isAuthed, user, openLogin } = useAuth()
 
-const name = ref('')
 const saved = ref(false)
 const saving = ref(false)
 const saveError = ref(false)
+const pendingSave = ref(false)
 
 const sticker = computed(() => {
   const p = q.pct.value
@@ -26,18 +27,20 @@ const sticker = computed(() => {
 })
 
 async function saveScore() {
-  if (!name.value.trim() || saved.value || saving.value || q.mode.value !== 'ranked') return
+  if (saved.value || saving.value || q.mode.value !== 'ranked') return
+  if (!isAuthed.value) {
+    pendingSave.value = true
+    openLogin()
+    return
+  }
   saving.value = true
   saveError.value = false
   try {
     await save({
-      name: name.value.trim(),
       level: q.level.value,
       correct: q.firstCorrect.value,
       total: q.firstTotal.value,
       points: q.rankedScore.value,
-      day: today(),
-      date: new Date().toISOString(),
     })
     saved.value = true
   } catch {
@@ -47,12 +50,19 @@ async function saveScore() {
   }
 }
 
+watch(isAuthed, (authed) => {
+  if (authed && pendingSave.value) {
+    pendingSave.value = false
+    saveScore()
+  }
+})
+
 function finish() {
   q.restart()
-  name.value = ''
   saved.value = false
   saving.value = false
   saveError.value = false
+  pendingSave.value = false
 }
 </script>
 
@@ -95,23 +105,17 @@ function finish() {
       </BaseButton>
 
       <template v-if="q.mode.value === 'ranked'">
-        <input
-          v-model="name"
-          class="input"
-          type="text"
-          placeholder="Your name"
-          maxlength="20"
-          :disabled="saved"
-          @keyup.enter="saveScore"
-        />
         <button
           class="save"
           :class="{ done: saved }"
-          :disabled="saved || saving || !name.trim()"
+          :disabled="saved || saving"
           @click="saveScore"
         >
-          {{ saved ? 'Saved ✓' : saving ? 'Saving…' : saveError ? 'Retry save' : 'Save to ranking' }}
+          {{ saved ? 'Saved ✓' : saving ? 'Saving…' : !isAuthed ? 'Log in to save' : saveError ? 'Retry save' : 'Save to ranking' }}
         </button>
+        <BaseText v-if="isAuthed && user" :size="Size.Xs" :color="Color.Text" :align="Align.Center">
+          Posting as {{ user.username }}
+        </BaseText>
         <BaseText v-if="saveError" :size="Size.Xs" :color="Color.Text" :align="Align.Center">
           Couldn't reach the ranking. Try again.
         </BaseText>
@@ -152,19 +156,6 @@ function finish() {
 }
 .sticker {
   align-self: center;
-}
-.input {
-  padding: 0.75rem;
-  border: 2px solid var(--color-border);
-  border-radius: 0.9rem;
-  background: var(--color-background-soft);
-  color: var(--color-heading);
-  font-size: 1rem;
-  text-align: center;
-}
-.input:focus {
-  outline: none;
-  border-color: var(--brand);
 }
 .save {
   padding: 0.85rem 1.25rem;

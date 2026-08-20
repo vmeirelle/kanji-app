@@ -2,11 +2,13 @@
 import { onMounted, ref } from 'vue'
 import { useQuiz, useBasics } from './composables/useQuiz'
 import { useRankings } from './composables/useRankings'
+import { useAuth } from './composables/useAuth'
 import { useSettings } from './composables/useSettings'
 import { useBreakpoint } from './composables/useBreakpoint'
 import AppBrand from './components/base/AppBrand.vue'
 import KanjiBadge from './components/base/KanjiBadge.vue'
 import FadeTransition from './components/base/FadeTransition.vue'
+import LoginModal from './components/base/LoginModal.vue'
 import HomeView from './views/HomeView.vue'
 import LearnView from './views/LearnView.vue'
 import BasicsView from './views/BasicsView.vue'
@@ -32,6 +34,7 @@ const NAV: NavItem[] = [
 const q = useQuiz()
 const basics = useBasics()
 const { rankings, loading: rankingsLoading, error: rankingsError, refresh: refreshRankings } = useRankings()
+const { promptOpen, closeLogin, restore } = useAuth()
 useSettings()
 const { isDesktop } = useBreakpoint()
 const view = ref('home')
@@ -40,6 +43,7 @@ const menuOpen = ref(false)
 onMounted(() => {
   q.start()
   basics.start()
+  restore()
 })
 
 function go(id: string) {
@@ -130,6 +134,8 @@ function resumeLesson(id: string) {
         <NotFound v-else />
       </FadeTransition>
     </main>
+
+    <LoginModal :open="promptOpen" @close="closeLogin" />
   </div>
 </template>
 

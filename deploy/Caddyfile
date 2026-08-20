@@ -1,0 +1,13 @@
+yourdomain.com {
+	encode gzip
+
+	handle /api/* {
+		reverse_proxy localhost:3000
+	}
+
+	handle {
+		root * /opt/kanji-app/dist
+		try_files {path} /index.html
+		file_server
+	}
+}

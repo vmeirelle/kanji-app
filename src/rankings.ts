@@ -1,5 +1,3 @@
-import { fetchRankings, insertRanking } from './supabase'
-
 export type Ranking = {
   name: string
   level: string
@@ -11,12 +9,6 @@ export type Ranking = {
 }
 
 export const points = (r: Ranking): number => r.points
-
-export const loadRankings = (): Promise<Ranking[]> => fetchRankings()
-
-export async function addRanking(entry: Ranking): Promise<void> {
-  await insertRanking(entry)
-}
 
 export const today = (): string => new Date().toLocaleDateString('en-CA')
 

@@ -2,8 +2,10 @@
 import { useSettings, type AutoSound, type JpFont, type Theme } from '../composables/useSettings'
 import BaseSegment from '../components/base/BaseSegment.vue'
 import PageHeader from '../components/base/PageHeader.vue'
+import { useAuth } from '../composables/useAuth'
 
 const s = useSettings()
+const { isAuthed, user, logout, openLogin } = useAuth()
 
 const soundOptions = [
   { value: 'never', label: 'Never' },
@@ -31,6 +33,18 @@ const onOff = [
     <PageHeader jp="設定" title="Settings" image="/writing.png" />
 
     <div class="scroll">
+      <div class="group">
+        <span class="tag">Account</span>
+        <template v-if="isAuthed && user">
+          <p class="hint">Signed in as <strong>{{ user.username }}</strong></p>
+          <button class="account-btn" @click="logout">Log out</button>
+        </template>
+        <template v-else>
+          <p class="hint">Log in to post scores to the global ranking.</p>
+          <button class="account-btn" @click="openLogin">Log in / Create account</button>
+        </template>
+      </div>
+
       <div class="group">
         <span class="tag">Auto pronunciation</span>
         <BaseSegment
@@ -111,5 +125,15 @@ const onOff = [
   font-size: 0.8rem;
   color: var(--color-text);
   opacity: 0.85;
+}
+.account-btn {
+  align-self: flex-start;
+  padding: 0.55rem 1rem;
+  border: 2px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-background-soft);
+  color: var(--color-heading);
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 </style>

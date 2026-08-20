@@ -4,78 +4,58 @@
 
 ## Goal
 
-Add username/password accounts (no email — closed beta) and move the leaderboard behind a
-proper backend. A score is tied to the logged-in account; the account username is the name
-shown on the board. Login/create is a single frontend modal.
+Username/password accounts (no email — closed beta) and the leaderboard behind a proper
+backend. A score is tied to the logged-in account; the account username is the board name.
+Login/create is a single frontend modal.
 
-## Stack
+## Stack (modeled on the `mypage-backend` reference project)
 
-- **Backend:** TypeScript, **Hono** (HTTP), **Prisma** (ORM), **MySQL**.
-- **Auth:** `argon2` password hashing, JWT access token (7-day expiry, no refresh).
-- **Frontend:** existing Vue app gains a login/register modal + `useAuth` composable + an
-  API client.
+- **Express** (404 fallback) + a custom `HttpServer` gateway with `@Route/@Get/@Post`.
+- **TypeORM + MySQL**, **tsyringe** DI, **ts-results** (`Result<Ok,Err>`, no throwing).
+- **zod** via a `@ValidateForm` decorator; **jsonwebtoken**; **md5** hashing.
+- Password: SHA-256 on the frontend, MD5 on the backend (behind `IHashService`).
 
-No live DB yet — build schema, migrations, and code so it runs once `DATABASE_URL` +
-`JWT_SECRET` are set. Connection/hosting decided later.
+No live DB yet — TypeORM `synchronize` creates tables in dev once env is set.
 
-## Clean Architecture layers (dependency rule points inward)
+## Layers (dependency rule points inward)
 
-```
-interfaces/http  ->  application (use-cases + ports)  ->  domain (entities + repo interfaces)
-infrastructure  ---- implements ---->  application/domain interfaces
-```
+`InterfaceAdapters → AplicationBusiness → EnterpriseBusiness`, with `Main` as the
+composition root. See `server/ARCHITECTURE.md` for the full layer map.
 
-- **domain/**: pure entities (`User`, `Ranking`), repository interfaces (ports), domain errors.
-  Zero framework imports.
-- **application/**: use cases (`RegisterUser`, `LoginUser`, `GetMe`, `SubmitScore`,
-  `ListRankings`), port interfaces (`PasswordHasher`, `TokenService`), DTOs. Depends only on
-  domain. No Hono, no Prisma.
-- **infrastructure/**: adapters — `PrismaUserRepository`, `PrismaRankingRepository`,
-  `Argon2PasswordHasher`, `JwtTokenService`, prisma client, env config.
-- **interfaces/http/**: controllers, routes, middleware (auth, error). Translates HTTP <->
-  use-case calls.
-- **main.ts**: composition root. Instantiates adapters, injects them into use cases, injects
-  use cases into controllers, mounts routes, starts the server.
+- **EnterpriseBusiness**: entities (`User`, `Ranking`, base `Entity`, `Id`), `TagError`
+  errors, use-case contracts (`UseCase<Form,Res,Errors>` + `I*UseCase` + Form/Result/Errors).
+- **AplicationBusiness**: use-case implementations, `I*Repository`/`I*Service` ports,
+  `validators`, `@ValidateForm`.
+- **InterfaceAdapters**: TypeORM repos + models, `HashService`/`TokenService`, HTTP gateway,
+  `*HttpApiController` returning `HttpResult`.
+- **Main**: `ContainerAdapter`, `HashAdapter`, `JwtAdapter`, `HttpServerAdapter`, DI
+  registrations, TypeORM DataSource.
 
-## Data model (Prisma / MySQL)
+## Data model (TypeORM / MySQL)
 
 ```
-User    { id, username @unique, passwordHash, createdAt }
-Ranking { id, userId -> User, level, correct, total, points, day, date, createdAt }
+users    { id, username @unique, password_hash, created_at }
+rankings { id, user_id -> users, level, correct, total, points, day, date, created_at }
 ```
-
-No email. No free-text name. Leaderboard name = `user.username`.
 
 ## API
 
-| method | route            | auth | purpose                                    |
-|--------|------------------|------|--------------------------------------------|
-| POST   | /auth/register   | -    | create account (username + password)       |
-| POST   | /auth/login      | -    | returns JWT + user                         |
-| GET    | /auth/me         | JWT  | current user                               |
-| GET    | /rankings        | -    | public board; filter by day/level          |
-| POST   | /rankings        | JWT  | submit score; server stamps name=username  |
+| Method | Path                 | Auth | Body / Query                          |
+|--------|----------------------|------|---------------------------------------|
+| POST   | /api/auth/register   | -    | { username, password }                |
+| POST   | /api/auth/login      | -    | { username, password }                |
+| GET    | /api/auth/me         | JWT  | -                                     |
+| GET    | /api/rankings        | -    | ?day=YYYY-MM-DD&level=                 |
+| POST   | /api/rankings        | JWT  | { level, correct, total, points }     |
 
-Validation via zod at the controller boundary. Errors mapped to HTTP by error middleware.
+`POST /api/rankings` stamps day/date server-side and takes the user id from the JWT.
 
-## Frontend additions
+## Frontend additions (phase 2, not built yet)
 
-- `LoginModal.vue`: one modal, toggle Login / Create account (username + password only).
-- `useAuth.ts`: stores JWT in localStorage; exposes `user`, `login`, `register`, `logout`.
-- `src/api.ts`: calls backend at `VITE_API_URL`; replaces `src/supabase.ts` for rankings.
-- `QuizResult`: "Save to ranking" requires login (opens modal if logged out); no name field.
+- `LoginModal.vue` (username + password, Login / Create toggle), `useAuth.ts`, `src/api.ts`.
+- Cutover ranking read/write from Supabase to the new API once the backend is deployed.
 
-## Sequencing (don't break the live site)
+## Status
 
-1. **Now:** full backend (domain/application/infrastructure/interfaces, schema, migrations)
-   + frontend `LoginModal` + `useAuth` as self-contained pieces.
-2. **Cutover (later, once backend is deployed with a DB):** switch the frontend ranking
-   read/write from Supabase (`src/supabase.ts`) to `src/api.ts`. Until then the live
-   Supabase leaderboard keeps working untouched.
-
-## Non-goals (YAGNI)
-
-- No email, password reset, or email verification.
-- No refresh tokens / rotation (single access token for beta).
-- No roles/permissions beyond "logged in".
-- No social login.
+Backend built and type-checks clean (`npm run type-check`, exit 0). No DB wired yet.
+Frontend modal + cutover pending.
