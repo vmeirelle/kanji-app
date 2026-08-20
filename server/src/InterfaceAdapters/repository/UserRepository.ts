@@ -47,4 +47,24 @@ export default class UserRepository implements IUserRepository {
       return Err(new DatabaseError())
     }
   }
+
+  async getState(userId: number): Promise<Result<string | null, DatabaseError>> {
+    try {
+      const row = await this.model.findOne({ where: { id: userId }, select: { state: true } })
+      return Ok(row?.state ?? null)
+    } catch (e) {
+      console.error('UserRepository.getState', e)
+      return Err(new DatabaseError())
+    }
+  }
+
+  async saveState(userId: number, state: string): Promise<Result<void, DatabaseError>> {
+    try {
+      await this.model.update({ id: userId }, { state })
+      return Ok(undefined)
+    } catch (e) {
+      console.error('UserRepository.saveState', e)
+      return Err(new DatabaseError())
+    }
+  }
 }

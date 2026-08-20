@@ -21,6 +21,9 @@ export default class UserModel {
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date
 
+  @Column({ type: 'longtext', nullable: true })
+  state!: string | null
+
   @OneToMany(() => RankingModel, (ranking) => ranking.user)
   rankings!: RankingModel[]
 }

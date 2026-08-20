@@ -80,7 +80,7 @@ const onEnd = (e: TouchEvent) => {
     </div>
 
     <EmptyState v-else-if="error" src="/lost.png">
-      Couldn't load the ranking.
+      Couldn't load the ranking — the server may be waking up.
       <button class="retry" @click="$emit('retry')">Try again</button>
     </EmptyState>
 
@@ -148,8 +148,8 @@ const onEnd = (e: TouchEvent) => {
   }
 }
 .retry {
-  display: inline-block;
-  margin-top: 0.75rem;
+  display: block;
+  margin: 0.75rem auto 0;
   padding: 0.5rem 1rem;
   border: 2px solid var(--color-border);
   border-radius: 0.75rem;

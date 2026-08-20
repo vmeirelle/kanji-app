@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppBrand from './AppBrand.vue'
 import KanjiBadge from './KanjiBadge.vue'
+import NavFooter from './NavFooter.vue'
 
 export type NavItem = { id: string; label: string; kanji: string }
 
@@ -30,6 +31,7 @@ const emit = defineEmits<{ select: [id: string]; close: []; home: [] }>()
             <span>{{ item.label }}</span>
           </button>
         </nav>
+        <NavFooter />
       </aside>
     </div>
   </Transition>

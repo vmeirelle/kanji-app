@@ -45,3 +45,7 @@ export function useSettings(): Settings {
   }
   return instance
 }
+
+export function hydrateSettings(partial: Partial<Settings>): void {
+  Object.assign(useSettings(), partial)
+}

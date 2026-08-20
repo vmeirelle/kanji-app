@@ -226,6 +226,10 @@ function createQuiz(opts: QuizOpts) {
     savedLessons.value = dropSaved(savedLessons.value, id)
   }
 
+  function reloadSaved() {
+    savedLessons.value = loadSaved()
+  }
+
 
   function startPass() {
     if (!poolSize.value) return
@@ -365,6 +369,7 @@ function createQuiz(opts: QuizOpts) {
     savedLessons,
     resume,
     drop,
+    reloadSaved,
     question,
     chosenKey,
     answered,

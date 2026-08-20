@@ -1,10 +1,12 @@
 import { ref } from 'vue'
 import { useAuth } from './useAuth'
+import { useProfileSync } from './useProfileSync'
 import { authService } from '../services/AuthService'
 import { ApiError } from '../services/HttpClient'
 
 export function useAccountCreate() {
   const { setSession } = useAuth()
+  const { onRegistered } = useProfileSync()
   const username = ref('')
   const password = ref('')
   const loading = ref(false)
@@ -17,6 +19,7 @@ export function useAccountCreate() {
     try {
       const auth = await authService.register(username.value.trim(), password.value)
       setSession(auth)
+      await onRegistered()
       return true
     } catch (e) {
       error.value = e instanceof ApiError ? e.message : 'Could not create the account'

@@ -25,6 +25,8 @@ const KEY = 'kanji-saved.v1'
 
 export const loadSaved = (): SavedLesson[] => storage.load<SavedLesson[]>(KEY) ?? []
 
+export const setSaved = (list: SavedLesson[]): void => storage.save(KEY, list)
+
 export function putSaved(list: SavedLesson[], lesson: SavedLesson): SavedLesson[] {
   const next = [lesson, ...list.filter((x) => x.id !== lesson.id)]
   storage.save(KEY, next)

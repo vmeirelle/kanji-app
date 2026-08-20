@@ -3,12 +3,15 @@ import { onMounted, ref } from 'vue'
 import { useQuiz, useBasics } from './composables/useQuiz'
 import { useRankings } from './composables/useRankings'
 import { useAuth } from './composables/useAuth'
+import { useProfileSync } from './composables/useProfileSync'
 import { useSettings } from './composables/useSettings'
 import { useBreakpoint } from './composables/useBreakpoint'
 import AppBrand from './components/base/AppBrand.vue'
 import KanjiBadge from './components/base/KanjiBadge.vue'
 import FadeTransition from './components/base/FadeTransition.vue'
 import LoginModal from './components/base/LoginModal.vue'
+import NavFooter from './components/base/NavFooter.vue'
+import ServerBanner from './components/base/ServerBanner.vue'
 import HomeView from './views/HomeView.vue'
 import LearnView from './views/LearnView.vue'
 import BasicsView from './views/BasicsView.vue'
@@ -33,16 +36,19 @@ const NAV: NavItem[] = [
 const q = useQuiz()
 const basics = useBasics()
 const { rankings, loading: rankingsLoading, error: rankingsError, refresh: refreshRankings } = useRankings()
-const { promptOpen, closeLogin, restore } = useAuth()
+const { token, promptOpen, closeLogin, restore } = useAuth()
+const sync = useProfileSync()
 useSettings()
 const { isDesktop } = useBreakpoint()
 const view = ref('home')
 const menuOpen = ref(false)
 
-onMounted(() => {
+onMounted(async () => {
   q.start()
   basics.start()
-  restore()
+  sync.startAutoSync()
+  await restore()
+  if (token.value) sync.onLoggedIn()
 })
 
 function go(id: string) {
@@ -81,6 +87,7 @@ function resumeLesson(id: string) {
           <KanjiBadge :char="item.kanji" round :size="1.7" />{{ item.label }}
         </button>
       </nav>
+      <NavFooter />
     </aside>
 
     <main class="app">
@@ -135,6 +142,7 @@ function resumeLesson(id: string) {
     </main>
 
     <LoginModal :open="promptOpen" @close="closeLogin" />
+    <ServerBanner />
   </div>
 </template>
 

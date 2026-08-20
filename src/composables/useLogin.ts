@@ -1,10 +1,12 @@
 import { ref } from 'vue'
 import { useAuth } from './useAuth'
+import { useProfileSync } from './useProfileSync'
 import { authService } from '../services/AuthService'
 import { ApiError } from '../services/HttpClient'
 
 export function useLogin() {
   const { setSession } = useAuth()
+  const { onLoggedIn } = useProfileSync()
   const username = ref('')
   const password = ref('')
   const loading = ref(false)
@@ -17,6 +19,7 @@ export function useLogin() {
     try {
       const auth = await authService.login(username.value.trim(), password.value)
       setSession(auth)
+      await onLoggedIn()
       return true
     } catch (e) {
       error.value = e instanceof ApiError ? e.message : 'Could not sign in'

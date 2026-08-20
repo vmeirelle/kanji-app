@@ -1,4 +1,5 @@
-const BASE = import.meta.env.VITE_API_URL || 'https://kanji-api-egc8.onrender.com'
+import { API_BASE } from './config'
+import { reportOnline, reportOffline } from '../composables/useServerStatus'
 
 export class ApiError extends Error {
   constructor(
@@ -13,6 +14,7 @@ export class ApiError extends Error {
 export interface HttpClient {
   get<T>(path: string, token?: string | null): Promise<T>
   post<T>(path: string, body: unknown, token?: string | null): Promise<T>
+  put<T>(path: string, body: unknown, token?: string | null): Promise<T>
 }
 
 class FetchHttpClient implements HttpClient {
@@ -24,6 +26,10 @@ class FetchHttpClient implements HttpClient {
     return this.request<T>('POST', path, body, token)
   }
 
+  put<T>(path: string, body: unknown, token?: string | null): Promise<T> {
+    return this.request<T>('PUT', path, body, token)
+  }
+
   private async request<T>(
     method: string,
     path: string,
@@ -33,11 +39,18 @@ class FetchHttpClient implements HttpClient {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
     if (token) headers.Authorization = `Bearer ${token}`
 
-    const res = await fetch(`${BASE}/api${path}`, {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    })
+    let res: Response
+    try {
+      res = await fetch(`${API_BASE}/api${path}`, {
+        method,
+        headers,
+        body: body === undefined ? undefined : JSON.stringify(body),
+      })
+    } catch (e) {
+      reportOffline()
+      throw e
+    }
+    reportOnline()
 
     const data = res.status === 204 ? null : await res.json().catch(() => null)
     if (!res.ok) {

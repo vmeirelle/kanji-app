@@ -11,4 +11,6 @@ export default interface IUserRepository {
   findByUsername(username: string): Promise<Result<User | null, DatabaseError>>
   findById(id: number): Promise<Result<User | null, DatabaseError>>
   create(data: CreateUserData): Promise<Result<User, DatabaseError>>
+  getState(userId: number): Promise<Result<string | null, DatabaseError>>
+  saveState(userId: number, state: string): Promise<Result<void, DatabaseError>>
 }
