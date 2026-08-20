@@ -1,43 +1,51 @@
-git push -u origin main
-# kanji-app
+# Yomi — Kanji Study
 
-This template should help get you started developing with Vue 3 in Vite.
+Timed kanji & kana practice with ranked rounds and a global leaderboard.
 
-## Recommended IDE Setup
+**Live:** https://kanji-app-9ks.pages.dev
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Stack
 
-## Recommended Browser Setup
+- **Frontend** — Vue 3 + Vite (TypeScript), static.
+- **Backend** — Express + TypeORM, Clean Architecture (ts-results, tsyringe, JWT auth).
+- **Database** — MySQL.
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+## Layout
 
-## Type Support for `.vue` Imports in TS
+```
+src/       Vue frontend — views, components, composables, services
+server/    TypeScript API — Clean Architecture (see server/ARCHITECTURE.md)
+```
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+## Run locally
 
-## Customize configuration
+Frontend:
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
+```
 npm install
+npm run dev            # http://localhost:5173
 ```
 
-### Compile and Hot-Reload for Development
+Backend:
 
-```sh
-npm run dev
+```
+cd server
+cp .env.example .env   # fill in DB + JWT values
+npm install
+npm run dev            # http://localhost:3000
 ```
 
-### Type-Check, Compile and Minify for Production
+Set `VITE_API_URL` in a root `.env.local` to point the frontend at your local API.
 
-```sh
-npm run build
-```
+## Deploy (developers)
+
+Hot deploy: **push to `main` and both halves redeploy automatically.** No manual steps.
+
+- **Frontend → Cloudflare Pages** — repo connected once. Build `npm run build`, output `dist`. Free tier.
+- **Backend → Render** — repo connected once. Root dir `server`, build `npm ci --include=dev && npm run build`, start `npm start`. Free tier (sleeps when idle; first request after idle is slow).
+- **Database → MySQL (TiDB Cloud Serverless)** — free tier. Tables auto-create on first boot via TypeORM.
+
+Every provider reads its config from **environment variables set in its own dashboard** (never committed):
+
+- **Backend:** `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SSL`, `JWT_SECRET`, `JWT_EXPIRATION_SECONDS`, `CORS_ORIGINS`. See `server/.env.example`.
+- **Frontend:** `VITE_API_URL` (optional — the API base is also defaulted in code).

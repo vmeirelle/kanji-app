@@ -25,7 +25,6 @@ const NAV: NavItem[] = [
   { id: 'home', label: 'Home', kanji: '家' },
   { id: 'basics', label: 'Basics', kanji: 'あ' },
   { id: 'learn', label: 'Learn', kanji: '学' },
-  { id: 'vocab', label: 'Reading', kanji: '読' },
   { id: 'saved', label: 'Unfinished', kanji: '未' },
   { id: 'ranking', label: 'Ranking', kanji: '位' },
   { id: 'settings', label: 'Settings', kanji: '設' },
@@ -105,7 +104,7 @@ function resumeLesson(id: string) {
       />
 
       <FadeTransition>
-        <HomeView v-if="view === 'home'" @go="go" />
+        <HomeView v-if="view === 'home'" />
 
         <LearnView v-else-if="view === 'learn'" />
 
