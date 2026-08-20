@@ -16,6 +16,7 @@ export const AppDataSource = new DataSource({
   synchronize: config.environment !== 'production',
   logging: false,
   entities: [UserModel, RankingModel],
+  ssl: config.database.ssl ? { minVersion: 'TLSv1.2', rejectUnauthorized: true } : undefined,
 })
 
 export async function initDatabase(): Promise<void> {
