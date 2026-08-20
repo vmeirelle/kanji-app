@@ -14,9 +14,9 @@ const checking = computed(() => status.value === 'checking')
   <Transition name="rise">
     <div v-if="visible" class="banner" role="status">
       <span class="dot" :class="{ pulse: checking }" />
-      <p class="msg">Server's offline — keep learning, but progress isn't being saved right now.</p>
+      <p class="msg">You're offline — progress isn't being saved.</p>
       <button class="act" :disabled="checking" @click="check">
-        {{ checking ? 'Checking…' : 'Check again' }}
+        {{ checking ? 'Checking…' : 'Retry' }}
       </button>
       <button class="x" aria-label="Dismiss" @click="dismiss">✕</button>
     </div>
@@ -26,29 +26,26 @@ const checking = computed(() => status.value === 'checking')
 <style scoped>
 .banner {
   position: fixed;
-  left: 50%;
-  bottom: 1rem;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
   z-index: 40;
+  margin: 0 auto;
+  width: fit-content;
+  max-width: calc(100% - 1.5rem);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  max-width: calc(100% - 2rem);
-  padding: 0.6rem 0.75rem 0.6rem 0.9rem;
+  gap: 0.55rem;
+  padding: 0.6rem 0.65rem 0.6rem 0.85rem;
   border: 2px solid var(--color-border);
-  border-radius: 999px;
+  border-radius: 0.9rem;
   background: var(--color-background);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-}
-@media (min-width: 48rem) {
-  .banner {
-    left: calc(50% + var(--sidebar) / 2);
-  }
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 .dot {
   flex: none;
-  width: 0.6rem;
-  height: 0.6rem;
+  width: 0.55rem;
+  height: 0.55rem;
   border-radius: 50%;
   background: #e0a021;
 }
@@ -62,18 +59,19 @@ const checking = computed(() => status.value === 'checking')
 }
 .msg {
   font-size: 0.82rem;
-  color: var(--color-heading);
   line-height: 1.25;
+  color: var(--color-heading);
 }
 .act {
   flex: none;
-  padding: 0.4rem 0.75rem;
-  border: 2px solid var(--color-border);
-  border-radius: 999px;
-  background: var(--color-background-soft);
-  color: var(--color-heading);
+  padding: 0.4rem 0.7rem;
+  border: 2px solid var(--brand);
+  border-radius: 0.7rem;
+  background: var(--brand);
+  color: #fff;
   font-size: 0.8rem;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
 }
 .act:disabled {
@@ -85,9 +83,10 @@ const checking = computed(() => status.value === 'checking')
   border: none;
   background: transparent;
   color: var(--color-text);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0.25rem;
   cursor: pointer;
-  padding: 0.2rem;
 }
 .rise-enter-active,
 .rise-leave-active {
@@ -98,6 +97,6 @@ const checking = computed(() => status.value === 'checking')
 .rise-enter-from,
 .rise-leave-to {
   opacity: 0;
-  transform: translate(-50%, 1rem);
+  transform: translateY(0.75rem);
 }
 </style>
